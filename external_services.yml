@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  pgdb:
+    env_file: .env
+    container_name: ha_college_db
+    image: mdillon/postgis:11-alpine
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+
+volumes:
+  postgres-data:
+    name: postgres-data
