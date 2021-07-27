@@ -40,15 +40,21 @@ PRE_INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
-SYSTEM_APPS = ["user", "common", "core", "authentication"]
+SYSTEM_APPS = ["user", "common", "core", "authentication", "academics"]
 
-THIRD_PARTY_APPS = ["rest_framework", "django_filters", "rest_framework_simplejwt"]
+THIRD_PARTY_APPS = [
+    "rest_framework",
+    "django_filters",
+    "rest_framework_simplejwt",
+    "corsheaders",
+]
 
 INSTALLED_APPS = PRE_INSTALLED_APPS + SYSTEM_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -63,7 +69,7 @@ ROOT_URLCONF = "project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -187,3 +193,5 @@ SIMPLE_JWT = {
     "TOKEN_TYPE_CLAIM": "token_type",
     "JTI_CLAIM": "jti",
 }
+
+from .local_settings import *
