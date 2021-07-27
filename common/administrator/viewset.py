@@ -17,7 +17,7 @@ class CommonInfoViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         queryset = self.filter_queryset(
-            self.get_queryset().filter(general_info=self.request.instiution)
+            self.get_queryset().filter(general_info=self.request.institution)
         )
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
@@ -38,7 +38,7 @@ class CommonInfoViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        if self.request.general_info:
+        if self.request.institution:
             serializer.save(
                 created_by=self.request.user,
                 institution=self.request.institution,
