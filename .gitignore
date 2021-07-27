@@ -127,3 +127,5 @@ venv.bak/
 .idea/
 
 entrypoint.sh
+
+.DS_Store
