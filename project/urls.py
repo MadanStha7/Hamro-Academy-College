@@ -28,4 +28,6 @@ urlpatterns = [
     ),
     path("api/v1/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("api/v1/", include("academics.urls")),
+    path("api/v1/", include("general.urls")),
+    path("api/v1/", include("user.urls")),
 ]
