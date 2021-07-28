@@ -38,3 +38,4 @@ GRADE_CHOICES = (
     (9, "Nine"),
     (10, "Ten"),
 )
+SUBJECT_TYPES = (("1", "Theory"), ("2", "Theory and Practical"))
