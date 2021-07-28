@@ -17,7 +17,7 @@ class CommonInfoViewSet(viewsets.ModelViewSet):
 
     def get_object(self):
         queryset = self.filter_queryset(
-            self.get_queryset().filter(general_info=self.request.instiution)
+            self.get_queryset().filter(institution=self.request.institution)
         )
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
@@ -25,6 +25,11 @@ class CommonInfoViewSet(viewsets.ModelViewSet):
         self.check_object_permissions(self.request, obj)
 
         return obj
+
+    def get_serializer_context(self):
+        context = super(CommonInfoViewSet, self).get_serializer_context()
+        context["institution"] = self.request.institution
+        return context
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(
@@ -38,7 +43,7 @@ class CommonInfoViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        if self.request.general_info:
+        if self.request.institution:
             serializer.save(
                 created_by=self.request.user,
                 institution=self.request.institution,
