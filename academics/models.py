@@ -47,7 +47,7 @@ class Faculty(CommonInfo):
 
     def save(self, *args, **kwargs):
         self.name = self.name.title()
-        return super(Section, self).save(*args, **kwargs)
+        return super(Faculty, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name}"
