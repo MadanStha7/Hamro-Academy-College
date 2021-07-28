@@ -1,12 +1,10 @@
 from rest_framework import serializers
 
 from academics.models import Subject
+from common.utils import get_subject_type_name_of_value, validate_unique_name
 
 
 class SubjectSerializer(serializers.ModelSerializer):
-    subject = serializers.CharField(source="get_subject_type_display", read_only=True)
-    created_by = serializers.CharField(read_only=True)
-
     class Meta:
         model = Subject
         read_only_fields = ["created_by", "institution"]
@@ -16,13 +14,17 @@ class SubjectSerializer(serializers.ModelSerializer):
             "credit_hour",
             "subject_code",
             "subject_type",
-            "subject",
             "created_by",
             "institution",
         ]
 
+    def to_representation(self, data):
+        data = super(SubjectSerializer, self).to_representation(data)
+        data["subject_type"] = get_subject_type_name_of_value(data["subject_type"])
+        return data
+
     def validate_name(self, name):
-        if not self.instance:
-            if Subject.objects.filter(name=name.title()).exists():
-                raise serializers.ValidationError("Subject name is already exists")
+        name = validate_unique_name(
+            Subject, name, self.context.get("institution"), self.instance
+        )
         return name
