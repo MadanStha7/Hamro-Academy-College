@@ -25,3 +25,9 @@ DAY = (
 
 
 SYSTEM_DEFAULT_PASSWORD = "98HACOLLEGE123!@#"
+
+GRADE_CHOICES = (
+    ("11", "Eleven"),
+    ("12", "Twelve"),
+)
+SUBJECT_TYPES = (("1", "Theory"), ("2", "Theory and Practical"))

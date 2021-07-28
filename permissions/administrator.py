@@ -1,5 +1,5 @@
 from rest_framework.permissions import BasePermission
-from common.constant import SystemRole
+from common.models import SystemRole
 
 
 class AdministratorPermission(BasePermission):
