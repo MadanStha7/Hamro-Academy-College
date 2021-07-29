@@ -4,7 +4,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 from .serializers import CustomObtainPairSerializer
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from user.administrator.serializers.user import UserSerializer
+from user.common.serializers.user import UserSerializer
 from core.serializers import InstitutionInfoSerializers
 
 
