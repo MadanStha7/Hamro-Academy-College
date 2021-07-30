@@ -48,7 +48,7 @@ SYSTEM_APPS = [
     "authentication",
     "academics",
     "general",
-    "general",
+    "student",
 ]
 
 THIRD_PARTY_APPS = [
