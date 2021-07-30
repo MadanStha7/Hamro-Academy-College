@@ -12,40 +12,143 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('core', '0002_alter_institutioninfo_table'),
+        ("core", "0002_alter_institutioninfo_table"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Section',
+            name="Section",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_on', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Created at')),
-                ('modified_on', models.DateTimeField(auto_now=True, db_index=True, verbose_name='Last modified at')),
-                ('name', models.CharField(max_length=50)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='academics_section_created', to=settings.AUTH_USER_MODEL, verbose_name='Created by')),
-                ('institution', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='academics_section_general_info', to='core.institutioninfo')),
-                ('modified_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='academics_section_modified', to=settings.AUTH_USER_MODEL, verbose_name='Modified by')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="Created at"
+                    ),
+                ),
+                (
+                    "modified_on",
+                    models.DateTimeField(
+                        auto_now=True, db_index=True, verbose_name="Last modified at"
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="academics_section_created",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Created by",
+                    ),
+                ),
+                (
+                    "institution",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="academics_section_general_info",
+                        to="core.institutioninfo",
+                    ),
+                ),
+                (
+                    "modified_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="academics_section_modified",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Modified by",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'academics_section',
-                'unique_together': {('name', 'institution')},
+                "db_table": "academics_section",
+                "unique_together": {("name", "institution")},
             },
         ),
         migrations.CreateModel(
-            name='Grade',
+            name="Grade",
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('created_on', models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Created at')),
-                ('modified_on', models.DateTimeField(auto_now=True, db_index=True, verbose_name='Last modified at')),
-                ('name', models.CharField(choices=[(1, 'One'), (2, 'Two'), (3, 'Three'), (4, 'Four'), (5, 'Five'), (6, 'Six'), (7, 'Seven'), (8, 'Eight'), (9, 'Nine'), (10, 'Ten')], max_length=20)),
-                ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='academics_grade_created', to=settings.AUTH_USER_MODEL, verbose_name='Created by')),
-                ('institution', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='academics_grade_general_info', to='core.institutioninfo')),
-                ('modified_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='academics_grade_modified', to=settings.AUTH_USER_MODEL, verbose_name='Modified by')),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "created_on",
+                    models.DateTimeField(
+                        auto_now_add=True, db_index=True, verbose_name="Created at"
+                    ),
+                ),
+                (
+                    "modified_on",
+                    models.DateTimeField(
+                        auto_now=True, db_index=True, verbose_name="Last modified at"
+                    ),
+                ),
+                (
+                    "name",
+                    models.CharField(
+                        choices=[
+                            (1, "One"),
+                            (2, "Two"),
+                            (3, "Three"),
+                            (4, "Four"),
+                            (5, "Five"),
+                            (6, "Six"),
+                            (7, "Seven"),
+                            (8, "Eight"),
+                            (9, "Nine"),
+                            (10, "Ten"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "created_by",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="academics_grade_created",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Created by",
+                    ),
+                ),
+                (
+                    "institution",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="academics_grade_general_info",
+                        to="core.institutioninfo",
+                    ),
+                ),
+                (
+                    "modified_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="academics_grade_modified",
+                        to=settings.AUTH_USER_MODEL,
+                        verbose_name="Modified by",
+                    ),
+                ),
             ],
             options={
-                'db_table': 'academics_grade',
-                'unique_together': {('name', 'institution')},
+                "db_table": "academics_grade",
+                "unique_together": {("name", "institution")},
             },
         ),
     ]
