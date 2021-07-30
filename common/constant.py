@@ -41,6 +41,9 @@ SELECT_RELIGION = (
 )
 
 SELECT_GENDER = (("M", "Male"), ("F", "Female"), ("O", "Others"))
+
+SELECT_GENDER = (("M", "Male"), ("F", "Female"), ("O", "Others"))
+
 SELECT_BLOOD_GROUP = (
     ("1", "A+"),
     ("2", "B+"),
@@ -52,3 +55,36 @@ SELECT_BLOOD_GROUP = (
     ("8", "AB-"),
 )
 CONTRACT_TYPE = (("F", "FullTime"), ("P", "PartTime"))
+
+SELECT_RELIGION = (
+    ("H", "Hinduism"),
+    ("M", "Muslim"),
+    ("B", "Buddhism"),
+    ("C", "Christianity"),
+    ("O", "Others"),
+)
+
+RELATION_STATUS_CHOICES = (
+    ("F", "Father"),
+    ("M", "Mother"),
+    ("B", "Brother"),
+    ("S", "Sister"),
+    ("R", "Relative"),
+)
+
+CATEGORY_CHOICES = (
+    ("G", "General"),
+    ("O", "OBC"),
+    ("S", "Special"),
+    ("P", "Physically Challenged"),
+)
+
+SELECT_MARITAL_STATUS = (("M", "Married"), ("S", "Single"))
+
+
+SHIFT_CHOICES = (
+    ("Morning", "Morning"),
+    ("Day", "Day"),
+    ("Evening", "Evening"),
+    ("Extra", "Extra"),
+)
