@@ -49,7 +49,6 @@ SYSTEM_APPS = [
     "academics",
     "general",
     "student",
-    "staff",
 ]
 
 THIRD_PARTY_APPS = [
