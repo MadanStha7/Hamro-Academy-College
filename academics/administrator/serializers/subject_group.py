@@ -14,7 +14,6 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
     )
     subject = SubjectSerializer(read_only=True, many=True)
     section = SectionSerializer(read_only=True, many=True)
-    name_value = serializers.CharField(source="name", read_only=True)
 
     class Meta:
         model = SubjectGroup
@@ -22,7 +21,6 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "name",
-            "name_value",
             "subject",
             "subject_id",
             "section",
@@ -36,13 +34,13 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
 
     def to_representation(self, data):
         data = super(SubjectGroupSerializer, self).to_representation(data)
-        data["name"] = return_grade_name_of_value(data["name"])
         return data
 
     def validate_name(self, name):
         name = validate_unique_name(
             SubjectGroup, name, self.context.get("institution"), self.instance
         )
+
         return name
 
     def validate(self, attrs):
@@ -67,23 +65,3 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Same Section cannot be selected!")
 
         return attrs
-
-    def validate_subject_grade(self, subject, grade):
-        institution = self.request.institution
-        if SubjectGroup.objects.filter(
-            subject=subject, grade__id=grade, institution=institution
-        ).exists():
-            raise serializers.ValidationError(
-                "Subject Group with subject is already exists"
-            )
-        return subject
-
-    # def validate(self, section):
-    #     section_id = []
-    #     for i in section:
-    #         print(i)
-    #         if i not in section_id:
-    #             a = section_id.append(i)
-    #             print(a)
-    #     return section
-    #     return list(self(section))
