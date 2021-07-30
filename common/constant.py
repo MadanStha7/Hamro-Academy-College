@@ -31,3 +31,24 @@ GRADE_CHOICES = (
     ("12", "Twelve"),
 )
 SUBJECT_TYPES = (("1", "Theory"), ("2", "Theory and Practical"))
+
+SELECT_RELIGION = (
+    ("H", "Hinduism"),
+    ("M", "Muslim"),
+    ("B", "Buddhism"),
+    ("C", "Christianity"),
+    ("O", "Others"),
+)
+
+SELECT_GENDER = (("M", "Male"), ("F", "Female"), ("O", "Others"))
+SELECT_BLOOD_GROUP = (
+    ("1", "A+"),
+    ("2", "B+"),
+    ("3", "O+"),
+    ("4", "A-"),
+    ("5", "B-"),
+    ("6", "O-"),
+    ("7", "AB+"),
+    ("8", "AB-"),
+)
+CONTRACT_TYPE = (("F", "FullTime"), ("P", "PartTime"))
