@@ -5,7 +5,7 @@ from common.administrator.viewset import CommonInfoViewSet
 from rest_framework.response import Response
 
 
-class RoleViewSet(viewsets.ModelViewSet):
+class RoleViewSet(CommonInfoViewSet):
     """
     CRUD for role of the college.
     """
