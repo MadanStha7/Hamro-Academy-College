@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from common.constant import SYSTEM_DEFAULT_PASSWORD
 from student.models import StudentGuardianInfo, SecondaryGuardianInfo
-from user.administrator.serializers.user import UserSerializer
+from user.common.serializers.user import UserSerializer
 
 User = get_user_model()
 
