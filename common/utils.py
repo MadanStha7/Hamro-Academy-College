@@ -1,3 +1,7 @@
+import base64
+import uuid
+
+from django.core.files.base import ContentFile
 from django.db.models import Q
 from rest_framework import serializers
 from academics.models import Grade
