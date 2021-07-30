@@ -70,3 +70,11 @@ CATEGORY_CHOICES = (
 )
 
 SELECT_MARITAL_STATUS = (("M", "Married"), ("S", "Single"))
+
+
+SHIFT_CHOICES = (
+    ("Morning", "Morning"),
+    ("Day", "Day"),
+    ("Evening", "Evening"),
+    ("Extra", "Extra"),
+)
