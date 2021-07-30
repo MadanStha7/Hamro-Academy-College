@@ -30,8 +30,8 @@ class SystemUserAdmin(UserAdmin):
         "email",
     )
     fieldsets = (
-        (None, {"fields": ("username", "password")}),
-        (_("Personal info"), {"fields": ("first_name", "last_name", "email", "phone")}),
+        (None, {"fields": ("phone", "password")}),
+        (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
         (
             _("Permissions"),
             {
@@ -52,7 +52,15 @@ class SystemUserAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("username", "password1", "password2", "institution"),
+                "fields": (
+                    "phone",
+                    "first_name",
+                    "last_name",
+                    "roles",
+                    "password1",
+                    "password2",
+                    "institution",
+                ),
             },
         ),
     )

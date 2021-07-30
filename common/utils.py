@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import serializers
-
+from academics.models import Grade
 from common.constant import GRADE_CHOICES, SUBJECT_TYPES
 
 
@@ -33,3 +33,20 @@ def validate_unique_name(model, value, institution, instance):
             )
 
     return value
+
+
+def validate_unique_role(model, title, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.id), title=title, institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this Group already exists."
+            )
+    else:
+        if model.objects.filter(title=title, institution=institution).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this Group already exists."
+            )
+
+    return title
