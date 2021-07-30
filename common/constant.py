@@ -31,3 +31,42 @@ GRADE_CHOICES = (
     ("12", "Twelve"),
 )
 SUBJECT_TYPES = (("1", "Theory"), ("2", "Theory and Practical"))
+
+
+SELECT_GENDER = (("M", "Male"), ("F", "Female"), ("O", "Others"))
+
+SELECT_BLOOD_GROUP = (
+    ("1", "A+"),
+    ("2", "B+"),
+    ("3", "O+"),
+    ("4", "A-"),
+    ("5", "B-"),
+    ("6", "O-"),
+    ("7", "AB+"),
+    ("8", "AB-"),
+)
+
+SELECT_RELIGION = (
+    ("H", "Hinduism"),
+    ("M", "Muslim"),
+    ("B", "Buddhism"),
+    ("C", "Christianity"),
+    ("O", "Others"),
+)
+
+RELATION_STATUS_CHOICES = (
+    ("F", "Father"),
+    ("M", "Mother"),
+    ("B", "Brother"),
+    ("S", "Sister"),
+    ("R", "Relative"),
+)
+
+CATEGORY_CHOICES = (
+    ("G", "General"),
+    ("O", "OBC"),
+    ("S", "Special"),
+    ("P", "Physically Challenged"),
+)
+
+SELECT_MARITAL_STATUS = (("M", "Married"), ("S", "Single"))
