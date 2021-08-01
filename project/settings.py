@@ -47,6 +47,7 @@ THIRD_PARTY_APPS = [
     "django_filters",
     "rest_framework_simplejwt",
     "corsheaders",
+    "storages",
 ]
 
 INSTALLED_APPS = PRE_INSTALLED_APPS + SYSTEM_APPS + THIRD_PARTY_APPS
@@ -130,12 +131,13 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        # "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.BasicAuthentication",
         # "rest_framework.authentication.SessionAuthentication",
         # "rest_framework.authentication.TokenAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
     "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
 }
 
