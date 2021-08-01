@@ -50,6 +50,6 @@ class AcademicSessionViewSet(CommonInfoViewSet):
                 status=status.HTTP_200_OK,
             )
         return Response(
-            {"error": "Session id is required"},
-            status=status.HTTP_404_NOT_FOUND,
+            {"error": ["Session id is required"]},
+            status=status.HTTP_400_BAD_REQUEST,
         )

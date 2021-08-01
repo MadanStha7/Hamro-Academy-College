@@ -33,4 +33,5 @@ urlpatterns = [
     path("api/v1/", include("general.urls")),
     path("api/v1/", include("user.urls")),
     path("api/v1/", include("student.urls")),
+    path("api/v1/", include("staff.urls")),
 ]
