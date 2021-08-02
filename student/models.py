@@ -5,59 +5,13 @@ from academics.models import Grade, Section, Faculty, Shift
 from common.models import CommonInfo
 
 from common.constant import (
-    RELATION_STATUS_CHOICES,
     SELECT_GENDER,
     SELECT_MARITAL_STATUS,
 )
 from general.models import AcademicSession
+from guardian.models import StudentGuardianInfo
 
 User = get_user_model()
-
-
-class SecondaryGuardianInfo(CommonInfo):
-    relation = models.CharField(max_length=1, choices=RELATION_STATUS_CHOICES)
-    full_name = models.CharField(max_length=50)
-    address = models.TextField()
-    phone = models.CharField(max_length=15, db_index=True)
-    photo = models.ImageField(
-        upload_to="secondary_guardian/images",
-        default="default_images/default_profile_pic.png",
-    )
-
-    def __str__(self):
-        return self.full_name
-
-    class Meta:
-        db_table = "secondary_guardian_info"
-        ordering = ["-created_on"]
-
-
-class StudentGuardianInfo(CommonInfo):
-    user = models.ForeignKey(
-        User, related_name="student_guardian_info", on_delete=models.CASCADE
-    )
-    phone = models.CharField(max_length=15, unique=True, db_index=True)
-    occupation = models.CharField(max_length=50, blank=True, null=True)
-    address = models.TextField()
-    photo = models.ImageField(
-        upload_to="parent/images", default="default_images/default_profile_pic.png"
-    )
-    email = models.EmailField()
-    relation = models.CharField(max_length=1, choices=RELATION_STATUS_CHOICES)
-    secondary_guardian = models.ForeignKey(
-        SecondaryGuardianInfo,
-        on_delete=models.CASCADE,
-        related_name="student_secondary_guardian",
-        blank=True,
-        null=True,
-    )
-
-    def __str__(self):
-        return f"{self.user.get_full_name()}"
-
-    class Meta:
-        db_table = "student_guardian_info"
-        ordering = ["-created_on"]
 
 
 class StudentCategory(CommonInfo):
@@ -68,7 +22,7 @@ class StudentCategory(CommonInfo):
         return self.name
 
     class Meta:
-        db_table = "student_category"
+        db_table = "students_category"
 
 
 class StudentInfo(CommonInfo):
@@ -164,7 +118,7 @@ class StudentAcademicDetail(CommonInfo):
     )
 
     def __str__(self):
-        return f"{self.student.user.get_first_name()}"
+        return f"{self.student.user.get_full_name()}"
 
     class Meta:
         db_table = "student_academic"
