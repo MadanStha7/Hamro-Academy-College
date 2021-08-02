@@ -131,3 +131,20 @@ class Class(CommonInfo):
 
     def __str__(self):
         return f"{self.faculty.name}"
+
+
+class ApplyShift(CommonInfo):
+    shift = models.ForeignKey(Shift, related_name="apply_shift", on_delete=models.CASCADE)
+    grade = models.ForeignKey(
+        Grade, related_name="apply_shift", on_delete=models.CASCADE
+    )
+    section = models.ManyToManyField(Section, related_name="apply_shift", blank=True)
+    faculty = models.ForeignKey(
+        Faculty, related_name="apply_shift", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = "academic_apply_shift"
+
+    def __str__(self):
+        return f"{self.shift.name}"
