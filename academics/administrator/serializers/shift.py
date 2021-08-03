@@ -1,10 +1,8 @@
 from rest_framework import serializers
 from academics.models import (
-    Faculty,
     Shift,
 )
 from common.utils import validate_unique_name
-from .faculty import FacultySerializer
 
 
 class ShiftSerializer(serializers.ModelSerializer):

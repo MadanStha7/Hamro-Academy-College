@@ -94,3 +94,25 @@ def to_internal_value(data):
     )
     data = ContentFile(decoded_file, name=complete_file_name)
     return data
+
+
+def validate_unique_faculty_grade(model, value, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.id),
+            faculty=value["faculty"],
+            grade=value["grade"],
+            institution=institution,
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this faculty and grade already exists"
+            )
+    else:
+        if model.objects.filter(
+            faculty=value["faculty"], grade=value["grade"], institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this faculty and grade already exists"
+            )
+
+    return value
