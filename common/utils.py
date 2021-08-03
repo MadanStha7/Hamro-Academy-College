@@ -3,9 +3,14 @@ import uuid
 
 from django.core.files.base import ContentFile
 from django.db.models import Q
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from academics.models import Grade
 from common.constant import GRADE_CHOICES, SUBJECT_TYPES
+from general.models import AcademicSession
 
 
 def return_grade_name_of_value(name):
@@ -54,3 +59,38 @@ def validate_unique_role(model, title, institution, instance):
             )
 
     return title
+
+
+@csrf_exempt
+def encode_image(request):
+    import base64
+    from PIL import Image
+    from io import BytesIO, StringIO
+
+    image = request.FILES.get("document")
+    im = Image.open(image)
+    buffered = BytesIO()
+    if im.mode in ("RGBA", "P"):
+        im = im.convert("RGB")
+    im.save(buffered, format="JPEG")
+    encoded = base64.b64encode(buffered.getvalue())
+    return JsonResponse(
+        {"encoded_binary_data": "data:image/jpeg;base64," + encoded.decode("utf-8")}
+    )
+
+
+def to_internal_value(data):
+    """
+    helper function to convert base64 file into corresponding file
+    """
+    format, data = data.split(";base64,")
+    data = bytes(data, encoding="utf-8")
+    decoded_file = base64.b64decode(data)
+    file_name = str(uuid.uuid4())[:12]
+    file_extension = format.split("/")[-1]
+    complete_file_name = "%s.%s" % (
+        file_name,
+        file_extension,
+    )
+    data = ContentFile(decoded_file, name=complete_file_name)
+    return data
