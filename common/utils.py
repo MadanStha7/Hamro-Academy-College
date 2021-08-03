@@ -54,3 +54,23 @@ def validate_unique_role(model, title, institution, instance):
             )
 
     return title
+
+
+def validate_unique_phone(model, phone, institution, instance):
+    if instance:
+        print("instance", ~Q(instance.id))
+        print("instance", model)
+
+        if model.objects.filter(
+            ~Q(id=instance.user.id), phone=phone, institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this phone number already exists"
+            )
+    else:
+        if model.objects.filter(phone=phone, institution=institution).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this phone number already exists"
+            )
+
+    return phone
