@@ -54,3 +54,25 @@ def validate_unique_role(model, title, institution, instance):
             )
 
     return title
+
+
+def validate_unique_faculty_grade(model, value, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.id),
+            faculty=value["faculty"],
+            grade=value["grade"],
+            institution=institution,
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this faculty and grade already exists"
+            )
+    else:
+        if model.objects.filter(
+            faculty=value["faculty"], grade=value["grade"], institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this faculty and grade already exists"
+            )
+
+    return value

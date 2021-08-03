@@ -1,7 +1,3 @@
-from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.response import Response
-
 from academics.administrator.serializers.subject_group import SubjectGroupSerializer
 from academics.models import SubjectGroup
 from common.administrator.viewset import CommonInfoViewSet
@@ -10,8 +6,6 @@ from common.administrator.viewset import CommonInfoViewSet
 class SubjectGroupViewSet(CommonInfoViewSet):
     """
     Subject group list for the particular class.
-
-    Like list of all the subjects of the particular class.
     """
 
     queryset = SubjectGroup.objects.none()

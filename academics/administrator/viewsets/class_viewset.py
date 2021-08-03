@@ -11,5 +11,7 @@ class ClassViewSet(CommonInfoViewSet):
 
     def get_queryset(self):
         queryset = Class.objects.filter(institution=self.request.institution)
-        queryset = queryset.annotate(faculty_name=F("faculty__name"))
+        queryset = queryset.annotate(
+            faculty_name=F("faculty__name"), grade_name=F("grade__name")
+        )
         return queryset

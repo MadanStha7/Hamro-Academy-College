@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+from .local_settings import *
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -49,6 +51,7 @@ SYSTEM_APPS = [
     "academics",
     "general",
     "student",
+    "guardian",
 ]
 
 THIRD_PARTY_APPS = [
@@ -203,4 +206,3 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 }
 
-from .local_settings import *
