@@ -7,6 +7,8 @@ from common.models import CommonInfo
 from common.constant import (
     SELECT_GENDER,
     SELECT_MARITAL_STATUS,
+    SELECT_BLOOD_GROUP,
+    SELECT_RELIGION,
 )
 from general.models import AcademicSession
 from guardian.models import StudentGuardianInfo
@@ -41,9 +43,18 @@ class StudentInfo(CommonInfo):
         StudentGuardianInfo,
         related_name="student_info",
         on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
+
     phone = models.CharField(max_length=15, db_index=True)
     dob = models.DateField()
+    blood_group = models.CharField(
+        max_length=1, choices=SELECT_BLOOD_GROUP, blank=True, null=True
+    )
+    religion = models.CharField(
+        max_length=1, choices=SELECT_RELIGION, blank=True, null=True
+    )
     gender = models.CharField(max_length=1, choices=SELECT_GENDER)
     photo = models.ImageField(upload_to="student-photos/")
     marital_status = models.CharField(max_length=1, choices=SELECT_MARITAL_STATUS)
