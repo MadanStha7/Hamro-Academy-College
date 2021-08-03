@@ -95,7 +95,7 @@ class Document(CommonInfo):
     name = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.staff.user.username
+        return str(self.id)
 
     class Meta:
         db_table = "staff_document"
