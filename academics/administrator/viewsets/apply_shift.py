@@ -9,9 +9,7 @@ class ApplyShiftViewSet(CommonInfoViewSet):
     queryset = ApplyShift.objects.none()
 
     def get_queryset(self):
-        queryset = ApplyShift.objects.filter(
-            institution=self.request.institution,
-        )
+        queryset = ApplyShift.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(
             shift_name=F("shift__name"),
             shift_start_time=F("shift__start_time"),
