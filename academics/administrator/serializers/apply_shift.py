@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from academics.models import ApplyShift, Section
+from academics.models import ApplyShift
 
 
 class ApplyShiftSerializer(serializers.ModelSerializer):
