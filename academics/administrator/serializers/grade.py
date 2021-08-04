@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from academics.models import (
-    Grade,
-)
+from academics.models import Grade
 from common.utils import return_grade_name_of_value, validate_unique_name
 
 
