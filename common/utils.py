@@ -8,7 +8,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from academics.models import Grade
 from common.constant import GRADE_CHOICES, SUBJECT_TYPES
 from general.models import AcademicSession
 
