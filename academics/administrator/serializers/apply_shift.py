@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from academics.models import ApplyShift
+from academics.models import ApplyShift, Section
 from common.utils import validate_unique_faculty_grade
 
 
@@ -28,18 +28,17 @@ class ApplyShiftSerializer(serializers.ModelSerializer):
             "institution",
         ]
 
-    # def validate(self, attrs):
-    #     name = validate_unique_faculty_grade(
-    #         ApplyShift, attrs, self.context.get("institution"), self.instance
-    #     )
-    #     return attrs
+    def create(self, validated_data):
+        faculty_data = validated_data.pop("faculty")
+        grade_data = validated_data.pop("grade")
+        shift_data = validated_data.pop("shift")
+        section_data = validated_data.pop("section")
 
-    # def create(self, validated_data):
-    #     faculty_data = validated_data.pop("faculty")
-    #     grade_data = validated_data.pop("grade")
-    #     shift_data = validated_data.pop("shift")
-    #     section_data = validated_data.pop("section")
-    #
-    #     apply_shift = ApplyShift.objects.create(**validated_data)
-    #     apply_shift.save()
-    #     return apply_shift
+        apply_shift = ApplyShift.objects.get(
+            faculty__name=faculty_data, grade=grade_data, shift=shift_data
+        )
+        print("...........", apply_shift.id)
+        if apply_shift:
+            section = apply_shift.section.set(section_data)
+            print(section)
+        return apply_shift
