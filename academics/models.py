@@ -1,6 +1,8 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from common.models import CommonInfo
-from common.constant import GRADE_CHOICES, SUBJECT_TYPES, SHIFT_CHOICES
+from common.constant import GRADE_CHOICES, SUBJECT_TYPES, SHIFT_CHOICES, DAY
+from general.models import AcademicSession
 
 
 class Section(CommonInfo):
@@ -19,7 +21,6 @@ class Section(CommonInfo):
 
 
 class Grade(CommonInfo):
-
     name = models.CharField(max_length=20, choices=GRADE_CHOICES)
 
     class Meta:
@@ -134,7 +135,9 @@ class Class(CommonInfo):
 
 
 class ApplyShift(CommonInfo):
-    shift = models.ForeignKey(Shift, related_name="apply_shift", on_delete=models.CASCADE)
+    shift = models.ForeignKey(
+        Shift, related_name="apply_shift", on_delete=models.CASCADE
+    )
     grade = models.ForeignKey(
         Grade, related_name="apply_shift", on_delete=models.CASCADE
     )
