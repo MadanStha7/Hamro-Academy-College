@@ -7,15 +7,11 @@ class DocumentSerializer(serializers.ModelSerializer):
     document = serializers.ListField(
         child=serializers.FileField(max_length=100000), write_only=True
     )
-    document_name = serializers.SerializerMethodField(read_only=True)
-
-    def get_document_name(self, obj):
-        return Document.objects.filter(staff=obj.staff).values("document")
 
     class Meta:
         model = Document
         read_only_fields = ["institution", "created_by"]
-        fields = ["id", "staff", "document", "name", "document_name"]
+        fields = ["id", "staff", "document", "name"]
 
     @transaction.atomic
     def create(self, validated_data):

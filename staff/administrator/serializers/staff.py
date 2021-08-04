@@ -4,6 +4,7 @@ from common.utils import validate_unique_phone
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from academics.models import Faculty, Grade
+from datetime import date
 
 User = get_user_model()
 
@@ -11,24 +12,23 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     phone = serializers.CharField()
     full_name = serializers.CharField(write_only=True)
-    user_full_name = serializers.SerializerMethodField(read_only=True)
-
-    def get_user_full_name(self, obj):
-        name = obj.first_name + " " + obj.last_name
-        return name
+    # email = serializers.EmailField(required=False,allow_null=True)
 
     class Meta:
         model = User
         read_only_fields = ["first_name", "last_name"]
-
-        fields = ("id", "phone", "full_name", "user_full_name")
+        fields = (
+            "id",
+            "phone",
+            "full_name",
+        )
 
 
 class StaffSerializer(serializers.ModelSerializer):
     designation__name = serializers.CharField(read_only=True)
-    faculty_name = serializers.StringRelatedField(
-        many=True, read_only=True, source="faculty"
-    )
+    # faculty_name = serializers.StringRelatedField(
+    #     many=True, read_only=True, source="faculty"
+    # )
     gender_name = serializers.CharField(source="get_gender_display", read_only=True)
     gender_name = serializers.CharField(source="get_gender_display", read_only=True)
     religion_name = serializers.CharField(source="get_religion_display", read_only=True)
@@ -46,7 +46,6 @@ class StaffSerializer(serializers.ModelSerializer):
             "user",
             "designation",
             "address",
-            "phone",
             "dob",
             "gender",
             "religion",
@@ -58,13 +57,14 @@ class StaffSerializer(serializers.ModelSerializer):
             "religion_name",
             "blood_group_name",
             "faculty",
-            "faculty_name",
+            # "faculty_name",
         ]
 
     def validate(self, attrs):
         """
         check if the faculty is same
         """
+        # check if provided faculty is same or not
         no_of_faculty = []
         for item in attrs["faculty"]:
             no_of_faculty.append(item)
@@ -72,11 +72,19 @@ class StaffSerializer(serializers.ModelSerializer):
         for value in no_of_faculty:
             if no_of_faculty.count(value) > 1:
                 raise serializers.ValidationError("Same Faculty cannot be selected!")
+        # check if the provided date is greater than 15 or not
+        compare_date = date.today().year - attrs["dob"].year
+        print("compare date", compare_date)
+        if compare_date < 15:
+            raise serializers.ValidationError("age should be greater than 15")
         return attrs
 
     def validate_user(self, user):
         """check that faculty name is already exist"""
         phone = user.get("phone")
+        # phone number between 10 to 15
+        if len(phone) < 10 or len(phone) > 15:
+            raise serializers.ValidationError("enter the correct phone number!")
         phone = validate_unique_phone(
             User, phone, self.context.get("institution"), self.instance
         )
@@ -91,6 +99,8 @@ class StaffSerializer(serializers.ModelSerializer):
         all_name = user["full_name"].strip().split()
         first_name, last_name = all_name[0], all_name[1:]
         last_name_all = " ".join(last_name)
+        print("user", user)
+        print("&&&&&&&", user.get("email"))
         user = User.objects.create(
             phone=user.get("phone"),
             first_name=first_name,
@@ -129,3 +139,32 @@ class StaffSerializer(serializers.ModelSerializer):
             user_data_obj.last_name = last_name_all
             user_data_obj.save()
         return instance
+
+
+class StaffListSerializer(serializers.ModelSerializer):
+    designation__name = serializers.CharField(read_only=True)
+    faculty__name = serializers.CharField(read_only=True)
+    gender_name = serializers.CharField(source="get_gender_display", read_only=True)
+    religion_name = serializers.CharField(source="get_religion_display", read_only=True)
+    blood_group_name = serializers.CharField(
+        source="get_blood_group_display", read_only=True
+    )
+    teacher_full_name = serializers.CharField(
+        source="user.get_full_name", read_only=True
+    )
+
+    class Meta:
+        model = Staff
+        read_only_fields = ["institution", "created_by"]
+        fields = [
+            "id",
+            "photo",
+            "address",
+            "faculty",
+            "faculty__name",
+            "blood_group_name",
+            "religion_name",
+            "designation__name",
+            "gender_name",
+            "teacher_full_name",
+        ]
