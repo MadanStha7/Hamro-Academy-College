@@ -45,7 +45,6 @@ class Staff(CommonInfo):
     )
     faculty = models.ManyToManyField(Faculty, related_name="staff")
     address = models.TextField()
-    phone = models.CharField(max_length=15)
     dob = models.DateField()
     gender = models.CharField(max_length=1, choices=SELECT_GENDER)
     religion = models.CharField(
