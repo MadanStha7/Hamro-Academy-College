@@ -12,7 +12,12 @@ class GradeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Grade
         read_only_fields = ["institution", "created_by"]
-        fields = ["id", "name", "created_by", "institution"]
+        fields = [
+            "id",
+            "name",
+            "created_by",
+            "institution",
+        ]
 
     def validate_name(self, name):
         name = validate_unique_name(
