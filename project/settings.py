@@ -52,6 +52,8 @@ SYSTEM_APPS = [
     "general",
     "student",
     "guardian",
+    "staff",
+    "timetable",
 ]
 
 THIRD_PARTY_APPS = [

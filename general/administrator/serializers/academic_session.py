@@ -1,11 +1,11 @@
 from rest_framework import serializers
 from general.models import AcademicSession
 from common.utils import validate_unique_name
+from common.utils import return_grade_name_of_value
+from academics.models import Grade
 
 
 class AcademicSessionSerializer(serializers.ModelSerializer):
-    grade_name = serializers.CharField(source="grade.name", read_only=True)
-
     class Meta:
         model = AcademicSession
         read_only_fields = ["institution", "created_by"]
@@ -18,8 +18,15 @@ class AcademicSessionSerializer(serializers.ModelSerializer):
             "created_by",
             "institution",
             "grade",
-            "grade_name",
+            # "grade_name",
         ]
+
+    def to_representation(self, data):
+        data = super(AcademicSessionSerializer, self).to_representation(data)
+        data["grade_name"] = return_grade_name_of_value(
+            Grade.objects.get(id=data["grade"]).name
+        )
+        return data
 
     def validate_name(self, name):
         """check that academic session is already exist"""
