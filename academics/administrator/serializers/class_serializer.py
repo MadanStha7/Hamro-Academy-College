@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from academics.models import (
-    Class,
-)
+from academics.models import Class
 from common.utils import validate_unique_faculty_grade
 
 
