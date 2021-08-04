@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from academics.models import ApplyShift, Section
-from common.utils import validate_unique_faculty_grade
 
 
 class ApplyShiftSerializer(serializers.ModelSerializer):
