@@ -10,13 +10,6 @@ from user.models import SystemUser
 User = get_user_model()
 
 
-class SecondaryGuardianInfoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SecondaryGuardianInfo
-        read_only_fields = ["photo"]
-        fields = ["id", "relation", "full_name", "address", "phone", "photo"]
-
-
 class GuardianInfoSerializer(serializers.ModelSerializer):
     photo = serializers.SerializerMethodField(
         read_only=True, required=False, allow_null=True
@@ -70,20 +63,3 @@ class GuardianInfoSerializer(serializers.ModelSerializer):
         return super(GuardianInfoSerializer, self).update(instance, validated_data)
 
 
-class StudentGuardianInfoSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-
-    class Meta:
-        model = StudentGuardianInfo
-        read_only_fields = ["photo", "institution", "created_by"]
-        fields = [
-            "id",
-            "user",
-            "address",
-            "relation",
-            "photo",
-            "phone",
-            "occupation",
-            "institution",
-            "created_by",
-        ]

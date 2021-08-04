@@ -1,11 +1,10 @@
-from rest_framework.exceptions import ValidationError
+
 from rest_framework.generics import CreateAPIView
-from rest_framework.views import APIView
+
 
 from common.administrator.viewset import CommonInfoViewSet
 from guardian.administrator.serializer.guardianinfo import (
-    GuardianInfoSerializer,
-    StudentGuardianInfoSerializer,
+    GuardianInfoSerializer
 )
 
 from student.models import StudentGuardianInfo, StudentInfo

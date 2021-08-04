@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import F, Q
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -10,7 +11,7 @@ from student.administator.serializer.student import (
     StudentInfoSerializer,
     StudentListInfoSerializer,
 )
-from student.models import StudentInfo, StudentGuardianInfo
+from student.models import StudentInfo
 
 User = get_user_model()
 
@@ -41,12 +42,6 @@ class StudentInfoViewSet(CommonInfoViewSet):
         serializer_class = StudentInfoSerializer
         filter_fields = ["student_category"]
         search_fields = ["user__first_name", "user__last_name"]
-
-        # def get_queryset(self):
-        #     queryset = StudentInfo.objects.filter(
-        #         general_info=self.request.general_info
-        #     )
-        #     return queryset
 
         def list(self, request, *args, **kwargs):
             """
@@ -82,31 +77,19 @@ class StudentInfoViewSet(CommonInfoViewSet):
                 institution=self.request.institution,
             )
 
-        #
-        # def perform_create(self, serializer):
-        #     photo = self.request.data.get("photo")
-        #     if self.request.institution:
-        #         serializer.save(
-        #
-        #         )
-        #     else:
-        #         raise ValidationError("you are not enroll in this institution")
+        @transaction.atomic()
+        def destroy(self, request, *args, **kwargs):
+            """
+            Delete guardian based on the db ACID transition
+            """
+            instance = self.get_object()
+            obj = self.get_object().id
+            if instance.student:
+                instance.student.delete()
+            instance.user.delete()
+            self.perform_destroy(instance)
+            return Response(
+                {"message": f"object {obj} successfully deleted"},
+                status=status.HTTP_204_NO_CONTENT,
+            )
 
-        def disable_or_enable_student(self, request):
-            student_id = self.request.query_params.get("student")
-            if student_id:
-                student = get_object_or_404(StudentInfo, id=student_id)
-                if student:
-                    if student.disable:
-                        student.disable = False
-                    else:
-                        student.disable = True
-                    student.save()
-
-                    serializer = self.get_serializer(student)
-
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                return Response(
-                    {"error": " student not found"}, status=status.HTTP_404_NOT_FOUND
-                )
-            raise ValidationError("Guardian Info with this student id already exist")
