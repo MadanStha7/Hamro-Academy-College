@@ -1,6 +1,5 @@
 import base64
 import uuid
-
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.http import JsonResponse
