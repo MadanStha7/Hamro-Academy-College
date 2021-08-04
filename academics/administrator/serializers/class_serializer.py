@@ -5,9 +5,7 @@ from common.utils import validate_unique_faculty_grade
 
 class ClassSerializer(serializers.ModelSerializer):
     grade_name = serializers.CharField(read_only=True)
-    faculty_name = serializers.CharField(
-        read_only=True,
-    )
+    faculty_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = Class
