@@ -1,4 +1,3 @@
-from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from common.models import CommonInfo
 from common.constant import GRADE_CHOICES, SUBJECT_TYPES, SHIFT_CHOICES, DAY
