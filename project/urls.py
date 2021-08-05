@@ -19,7 +19,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from authentication.views import CustomTokenObtainPairView
-from common.models import encode_image
+from common.utils import encode_image
 
 urlpatterns = [
     path("api/admin/", admin.site.urls),
@@ -35,4 +35,6 @@ urlpatterns = [
     path("api/v1/", include("user.urls")),
     path("api/v1/", include("student.urls")),
     path("api/v1/", include("guardian.urls")),
+    path("api/v1/", include("staff.urls")),
+    path("api/v1/", include("timetable.urls")),
 ]

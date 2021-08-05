@@ -21,3 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
             "roles",
             "institution",
         )
+
+    def validate_phone(self, value):
+        if 10 > len(value) > 13:
+            raise serializers.ValidationError(
+                "length of phone number should be greater than or equal to 10 and less than or equal to 13"
+            )
+        return value

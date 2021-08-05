@@ -2,14 +2,11 @@ from rest_framework import serializers
 from academics.models import (
     Class,
 )
-from .faculty import FacultySerializer
-from .grade import GradeSerializer
-from .section import SectionSerializer
+from common.utils import validate_unique_faculty_grade
 
 
 class ClassSerializer(serializers.ModelSerializer):
-    section = serializers.StringRelatedField(many=True, read_only=True)
-    grade_name = serializers.CharField(source="grade.get_name_display", read_only=True)
+    grade_name = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
 
     class Meta:
@@ -18,25 +15,16 @@ class ClassSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "section",
+            "grade",
             "grade_name",
+            "faculty",
             "faculty_name",
             "created_by",
             "institution",
         ]
 
-    # def create(self, validated_data):
-    #     section = validated_data.pop("section")
-    #     class_obj, created = Class.objects.update_or_create(
-    #         grade=validated_data.get("grade"), defaults={**validated_data}
-    #     )
-    #     if section is not None:
-    #         class_obj.section.set(section)
-    #         class_obj.save()
-    #     return class_obj
-    #
-    # def update(self, instance, validated_data):
-    #     section = validated_data.pop("section")
-    #     instance.grade = validated_data.get("grade", instance.grade)
-    #     instance.section.set(section)
-    #     instance.save()
-    #     return instance
+    def validate(self, attrs):
+        attrs = validate_unique_faculty_grade(
+            Class, attrs, self.context.get("institution"), self.instance
+        )
+        return attrs
