@@ -42,6 +42,7 @@ class TimeTableSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data["start_time"] >= data["end_time"]:
             raise serializers.ValidationError("start time must be before end time")
+
         return data
 
 
@@ -51,9 +52,8 @@ class TimetableListSerialzer(serializers.ModelSerializer):
     """
 
     subject__name = serializers.CharField(read_only=True)
-    teacher_full_name = serializers.CharField(
-        source="teacher.get_full_name", read_only=True
-    )
+    teacher__firstname = serializers.CharField(read_only=True)
+    teacher__lastname = serializers.CharField(read_only=True)
     day_name = serializers.CharField(source="get_day_display", read_only=True)
 
     class Meta:
@@ -65,6 +65,7 @@ class TimetableListSerialzer(serializers.ModelSerializer):
             "start_time",
             "end_time",
             "academic_session",
-            "teacher_full_name",
             "subject__name",
+            "teacher__firstname",
+            "teacher__lastname",
         ]
