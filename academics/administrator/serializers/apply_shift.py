@@ -28,18 +28,18 @@ class ApplyShiftSerializer(serializers.ModelSerializer):
             "institution",
         ]
 
-    # def validate(self, attrs):
-    #     name = validate_unique_faculty_grade(
-    #         ApplyShift, attrs, self.context.get("institution"), self.instance
-    #     )
-    #     return attrs
-
-    # def create(self, validated_data):
-    #     faculty_data = validated_data.pop("faculty")
-    #     grade_data = validated_data.pop("grade")
-    #     shift_data = validated_data.pop("shift")
-    #     section_data = validated_data.pop("section")
-    #
-    #     apply_shift = ApplyShift.objects.create(**validated_data)
-    #     apply_shift.save()
-    #     return apply_shift
+    def create(self, validated_data):
+        faculty_data = validated_data.pop("faculty")
+        grade_data = validated_data.pop("grade")
+        shift_data = validated_data.pop("shift")
+        section_data = validated_data.pop("section")
+        instance, created = ApplyShift.objects.update_or_create(
+            faculty=faculty_data,
+            grade=grade_data,
+            shift=shift_data,
+            defaults={**validated_data},
+        )
+        if section_data is not None:
+            instance.section.set(section_data)
+            instance.save()
+        return instance
