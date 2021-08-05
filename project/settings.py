@@ -40,7 +40,17 @@ PRE_INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
-SYSTEM_APPS = ["user", "common", "core", "authentication", "academics"]
+
+SYSTEM_APPS = [
+    "user",
+    "common",
+    "core",
+    "authentication",
+    "academics",
+    "general",
+    "student",
+    "guardian",
+]
 
 THIRD_PARTY_APPS = [
     "rest_framework",

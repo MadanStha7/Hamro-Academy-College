@@ -1,6 +1,6 @@
 from django.db import models
 from common.models import CommonInfo
-from common.constant import GRADE_CHOICES
+from common.constant import GRADE_CHOICES, SUBJECT_TYPES, SHIFT_CHOICES
 
 
 class Section(CommonInfo):
@@ -31,7 +31,7 @@ class Grade(CommonInfo):
         return super(Grade, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name}"
+        return f"{self.institution}-{self.name}"
 
 
 class Faculty(CommonInfo):
@@ -51,3 +51,83 @@ class Faculty(CommonInfo):
 
     def __str__(self):
         return f"{self.name}"
+
+
+class Subject(CommonInfo):
+    """
+    model to store subjects
+    """
+
+    name = models.CharField(max_length=50)
+    credit_hour = models.FloatField()
+    subject_code = models.CharField(max_length=10)
+    subject_type = models.CharField(max_length=1, choices=SUBJECT_TYPES)
+
+    class Meta:
+        db_table = "academics_subjects"
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.title()
+
+        return super(Subject, self).save(*args, **kwargs)
+
+
+class Shift(CommonInfo):
+    name = models.CharField(choices=SHIFT_CHOICES, max_length=50)
+    faculty = models.ForeignKey(
+        Faculty, related_name="faculty_shift", on_delete=models.CASCADE
+    )
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+
+    class Meta:
+        db_table = "academics_shift"
+        unique_together = ["name", "institution"]
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.title()
+
+        return super(Shift, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class SubjectGroup(CommonInfo):
+    name = models.CharField(max_length=50)
+    section = models.ManyToManyField(Section, related_name="subject_group", blank=True)
+    grade = models.ForeignKey(
+        Grade, related_name="subject_group", on_delete=models.CASCADE
+    )
+    faculty = models.ForeignKey(
+        Faculty, related_name="subject_group", on_delete=models.CASCADE
+    )
+    subject = models.ManyToManyField(Subject, related_name="subjects")
+    description = models.TextField(blank=True, null=True)
+
+    class Meta:
+        db_table = "academic_subject_group"
+        unique_together = ["name", "institution"]
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.title()
+        return super(SubjectGroup, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Class(CommonInfo):
+    faculty = models.ForeignKey(
+        Faculty, related_name="class_faculty", on_delete=models.CASCADE
+    )
+    grade = models.ForeignKey(
+        Grade, related_name="class_grade", on_delete=models.CASCADE
+    )
+    section = models.ManyToManyField(Section, related_name="class_section", blank=True)
+
+    class Meta:
+        db_table = "academics_class"
+
+    def __str__(self):
+        return f"{self.faculty.name}"
