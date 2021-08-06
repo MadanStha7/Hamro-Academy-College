@@ -30,7 +30,7 @@ def get_subject_type_name_of_value(name):
 def validate_unique_name(model, value, institution, instance):
     if instance:
         if model.objects.filter(
-            ~Q(id=instance.id), name=value.title(), institution=institution
+                ~Q(id=instance.id), name=value.title(), institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this name already exists"
@@ -47,7 +47,7 @@ def validate_unique_name(model, value, institution, instance):
 def validate_unique_role(model, title, institution, instance):
     if instance:
         if model.objects.filter(
-            ~Q(id=instance.id), title=title, institution=institution
+                ~Q(id=instance.id), title=title, institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this Group already exists."
@@ -99,30 +99,32 @@ def to_internal_value(data):
 def validate_unique_faculty_grade(model, value, institution, instance):
     if instance:
         if model.objects.filter(
-            ~Q(id=instance.id),
-            faculty=value["faculty"],
-            grade=value["grade"],
-            institution=institution,
+                ~Q(id=instance.id),
+                faculty=value["faculty"],
+                grade=value["grade"],
+                institution=institution,
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this faculty and grade already exists"
             )
     else:
         if model.objects.filter(
-            faculty=value["faculty"], grade=value["grade"], institution=institution
+                faculty=value["faculty"], grade=value["grade"], institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this faculty and grade already exists"
             )
 
     return value
+
+
 def validate_unique_phone(model, phone, institution, instance):
     if instance:
         print("instance", ~Q(instance.id))
         print("instance", model)
 
         if model.objects.filter(
-            ~Q(id=instance.user.id), phone=phone, institution=institution
+                ~Q(id=instance.user.id), phone=phone, institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this phone number already exists"
@@ -134,3 +136,15 @@ def validate_unique_phone(model, phone, institution, instance):
             )
 
     return phone
+
+
+def active_academic_session(institution):
+    """
+    helper function to get the active academic session
+    """
+    academic_session = AcademicSession.objects.filter(
+        status=True, institution=institution
+    ).first()
+    if academic_session:
+        return academic_session
+    raise ValidationError({"error": ["No academic session is currently active"]})
