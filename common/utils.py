@@ -116,6 +116,8 @@ def validate_unique_faculty_grade(model, value, institution, instance):
             )
 
     return value
+
+
 def validate_unique_phone(model, phone, institution, instance):
     if instance:
         print("instance", ~Q(instance.id))
@@ -134,3 +136,20 @@ def validate_unique_phone(model, phone, institution, instance):
             )
 
     return phone
+
+
+def validate_unique_email(model, email, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.user.id), email=email, institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+    else:
+        if model.objects.filter(email=email, institution=institution).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+
+    return email
