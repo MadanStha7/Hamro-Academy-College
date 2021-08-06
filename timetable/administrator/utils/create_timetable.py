@@ -1,23 +1,11 @@
 from rest_framework.serializers import ValidationError
 from django.db import transaction, IntegrityError
+from common.utils import active_academic_session
 from timetable.models import TimeTable
 from academics.models import Section, Grade, Subject, Faculty, Shift
 from django.contrib.auth import get_user_model
-from general.models import AcademicSession
 
 User = get_user_model()
-
-
-def active_academic_session(institution):
-    """
-    helper function to get the active academic session
-    """
-    active_academic_session = AcademicSession.objects.filter(
-        status=True, institution=institution
-    ).first()
-    if active_academic_session:
-        return active_academic_session
-    raise ValidationError({"error": ["No academic session is currently active"]})
 
 
 def create_timetable(infos, user, institution):
