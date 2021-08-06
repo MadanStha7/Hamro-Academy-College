@@ -6,7 +6,6 @@ from common.models import CommonInfo
 
 from common.constant import (
     SELECT_GENDER,
-    SELECT_MARITAL_STATUS,
     SELECT_BLOOD_GROUP,
     SELECT_RELIGION,
 )
@@ -46,8 +45,6 @@ class StudentInfo(CommonInfo):
         blank=True,
         null=True,
     )
-
-    phone = models.CharField(max_length=15, db_index=True)
     dob = models.DateField()
     blood_group = models.CharField(
         max_length=1, choices=SELECT_BLOOD_GROUP, blank=True, null=True
@@ -57,9 +54,6 @@ class StudentInfo(CommonInfo):
     )
     gender = models.CharField(max_length=1, choices=SELECT_GENDER)
     photo = models.ImageField(upload_to="student-photos/")
-    marital_status = models.CharField(max_length=1, choices=SELECT_MARITAL_STATUS)
-    spouse_name = models.CharField(max_length=20, null=True, blank=True)
-
     disable = models.BooleanField(default=False, db_index=True)
 
     def __str__(self):
