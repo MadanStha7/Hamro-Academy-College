@@ -4,20 +4,22 @@ from timetable.administrator.serializers.timetable import (
     TimetableListSerialzer,
 )
 from timetable.administrator.utils.create_timetable import create_timetable
+from timetable.models import Staff
+from common.administrator.viewset import CommonInfoViewSet
+from timetable.models import TimeTable
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from permissions.administrator import AdministratorPermission
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
-from timetable.models import Staff
-from common.administrator.viewset import CommonInfoViewSet
-from timetable.models import TimeTable
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework import status
 from django.db.models import F
 from rest_framework import filters
+from collections import defaultdict
+
 import django_filters.rest_framework
 
 User = get_user_model()
@@ -37,12 +39,15 @@ class TimeTableViewSet(CommonInfoViewSet):
         shift = self.request.query_params.get("shift", False)
         grade = self.request.query_params.get("grade", False)
         section = self.request.query_params.get("section", False)
+        day = self.request.query_params.get("day", False)
+
         queryset = TimeTable.objects.filter(institution=self.request.institution)
 
         if faculty:
             queryset = queryset.filter(faculty__name__icontains=faculty)
         if grade:
             queryset = queryset.filter(grade__name=grade)
+            print("que", queryset)
 
         if section:
             queryset = queryset.filter(section__name__icontains=section)
@@ -50,13 +55,19 @@ class TimeTableViewSet(CommonInfoViewSet):
         if shift:
             queryset = queryset.filter(shift__name__icontains=shift)
 
+        if day:
+            queryset = queryset.filter(day=day)
         queryset = queryset.annotate(
             subject__name=F("subject__name"),
             teacher__firstname=F("teacher__first_name"),
             teacher__lastname=F("teacher__last_name"),
         )
+
         serializer = TimetableListSerialzer(queryset, many=True)
-        return Response(serializer.data)
+        timetables = defaultdict(list)
+        for data in serializer.data:
+            timetables[data["day_name"]].append(data)
+        return Response(timetables)
 
     @action(detail=False, methods=["POST", "PUT"])
     def save_bulk_timetable(self, request):
