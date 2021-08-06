@@ -68,4 +68,6 @@ class TimetableListSerialzer(serializers.ModelSerializer):
             "subject__name",
             "teacher__firstname",
             "teacher__lastname",
+            "teacher",
+            "subject",
         ]
