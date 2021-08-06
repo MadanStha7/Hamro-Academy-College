@@ -6,12 +6,8 @@ class PreviousAcademicSerializer(serializers.ModelSerializer):
     """
     serializer to list the previous student academic of student
     """
-
-
-
     class Meta:
         model = PreviousAcademicDetail
-
         read_only_fields = ["created_by", "institution"]
         fields = [
             "id",
