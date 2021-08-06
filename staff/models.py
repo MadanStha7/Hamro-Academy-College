@@ -6,8 +6,9 @@ from common.constant import (
     SELECT_GENDER,
     SELECT_BLOOD_GROUP,
     CONTRACT_TYPE,
+    MARITAL_STATUS,
 )
-from academics.models import Faculty
+from academics.models import Faculty, Shift
 
 User = get_user_model()
 
@@ -41,18 +42,16 @@ class Staff(CommonInfo):
     )
     user = models.OneToOneField(User, related_name="staff", on_delete=models.CASCADE)
     designation = models.ForeignKey(
-        Designation, related_name="staff", on_delete=models.CASCADE
+        Designation,
+        related_name="staff",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
-    faculty = models.ManyToManyField(Faculty, related_name="staff")
     address = models.TextField()
     dob = models.DateField()
-    gender = models.CharField(max_length=1, choices=SELECT_GENDER)
-    religion = models.CharField(
-        max_length=30, choices=SELECT_RELIGION, blank=True, null=True
-    )
-    blood_group = models.CharField(max_length=1, choices=SELECT_BLOOD_GROUP)
-    pan_no = models.CharField(max_length=50)
-    date_of_joining = models.DateField()
+    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS)
+    spouse_name = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
         return f"{self.user.get_full_name()}-{self.institution.name}"
@@ -67,14 +66,20 @@ class StaffAcademicInfo(CommonInfo):
     model to store the staff additional detail
     """
 
-    contract_type = models.CharField(max_length=1, choices=CONTRACT_TYPE)
     staff = models.OneToOneField(
         Staff, related_name="staff_academic_info", on_delete=models.CASCADE
     )
-    highest_degree = models.CharField(max_length=50)
-    experience = models.FloatField(default=0)
-    working_days = models.IntegerField()
-    leave = models.FloatField(default=0, help_text="Staff's leave days")
+    shift = models.ManyToManyField(Shift, related_name="staff_academic_info_faculty")
+    faculty = models.ManyToManyField(Faculty, related_name="staff_academic_info_shift")
+    highest_degree = models.CharField(max_length=50, null=True, blank=True)
+    experience = models.FloatField(default=0, null=True, blank=True)
+    working_days = models.IntegerField(null=True, blank=True)
+    leave = models.FloatField(
+        default=0, help_text="Staff's leave days", null=True, blank=True
+    )
+    previouse_academic_details = models.BooleanField(default=False)
+    previous_college_name = models.CharField(max_length=40, null=True, blank=True)
+    full_address = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.staff.phone

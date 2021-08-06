@@ -138,6 +138,7 @@ def validate_unique_phone(model, phone, institution, instance):
     return phone
 
 
+
 def active_academic_session(institution):
     """
     helper function to get the active academic session
@@ -148,3 +149,19 @@ def active_academic_session(institution):
     if academic_session:
         return academic_session
     raise ValidationError({"error": ["No academic session is currently active"]})
+
+def validate_unique_email(model, email, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.user.id), email=email, institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+    else:
+        if model.objects.filter(email=email, institution=institution).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+
+    return email

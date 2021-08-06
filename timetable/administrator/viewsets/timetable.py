@@ -4,19 +4,22 @@ from timetable.administrator.serializers.timetable import (
     TimetableListSerialzer,
 )
 from timetable.administrator.utils.create_timetable import create_timetable
+from timetable.models import Staff
+from common.administrator.viewset import CommonInfoViewSet
+from timetable.models import TimeTable
 from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from permissions.administrator import AdministratorPermission
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
-from timetable.models import Staff
-from common.administrator.viewset import CommonInfoViewSet
-from timetable.models import TimeTable
 from rest_framework.decorators import action
+from rest_framework.generics import get_object_or_404
 from rest_framework import status
 from django.db.models import F
 from rest_framework import filters
+from collections import defaultdict
+
 import django_filters.rest_framework
 
 User = get_user_model()
@@ -36,12 +39,15 @@ class TimeTableViewSet(CommonInfoViewSet):
         shift = self.request.query_params.get("shift", False)
         grade = self.request.query_params.get("grade", False)
         section = self.request.query_params.get("section", False)
+        day = self.request.query_params.get("day", False)
+
         queryset = TimeTable.objects.filter(institution=self.request.institution)
 
         if faculty:
             queryset = queryset.filter(faculty__name__icontains=faculty)
         if grade:
             queryset = queryset.filter(grade__name=grade)
+            print("que", queryset)
 
         if section:
             queryset = queryset.filter(section__name__icontains=section)
@@ -49,9 +55,19 @@ class TimeTableViewSet(CommonInfoViewSet):
         if shift:
             queryset = queryset.filter(shift__name__icontains=shift)
 
-        queryset = queryset.annotate(subject__name=F("subject__name"))
+        if day:
+            queryset = queryset.filter(day=day)
+        queryset = queryset.annotate(
+            subject__name=F("subject__name"),
+            teacher__firstname=F("teacher__first_name"),
+            teacher__lastname=F("teacher__last_name"),
+        )
+
         serializer = TimetableListSerialzer(queryset, many=True)
-        return Response(serializer.data)
+        timetables = defaultdict(list)
+        for data in serializer.data:
+            timetables[data["day_name"]].append(data)
+        return Response(timetables)
 
     @action(detail=False, methods=["POST", "PUT"])
     def save_bulk_timetable(self, request):
@@ -62,62 +78,23 @@ class TimeTableViewSet(CommonInfoViewSet):
         grade = self.request.query_params.get("grade", False)
         shift = self.request.query_params.get("shift", False)
         section = self.request.query_params.get("section", False)
-        # check if faculty object exist
+        day = self.request.query_params.get("day", False)
+
         if faculty:
-            try:
-                faculty_obj = Faculty.objects.get(id=faculty)
-            except Faculty.DoesNotExist:
-                return Response(
-                    {"error": ["faculty with this id doesn't exists"]},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
-            return Response(
-                {"error": ["Faculty is required"]},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            faculty_obj = get_object_or_404(Faculty, id=faculty)
 
-        # check if grade object exist
         if grade:
-            try:
-                grade_obj = Grade.objects.get(id=grade)
-            except Grade.DoesNotExist:
-                return Response(
-                    {"error": ["grade with this id doesn't exists"]},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
-            return Response(
-                {"error": ["Grade is required"]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            grade_obj = get_object_or_404(Grade, id=grade)
 
-        # check if shift object exist
         if shift:
-            try:
-                shift_obj = Shift.objects.get(id=shift)
-            except Shift.DoesNotExist:
-                return Response(
-                    {"error": ["shift with this id doesn't exists"]},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-        else:
-            return Response(
-                {"error": ["Shift is required"]},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            shift_obj = get_object_or_404(Shift, id=shift)
 
-        # check if section object exist
-        print("section", section)
         if section:
-            try:
-                section_obj = Section.objects.get(id=section)
-            except Section.DoesNotExist:
-                section_obj = None
+            section_obj = get_object_or_404(Section, id=section)
         else:
             section_obj = None
+
         if faculty_obj and grade_obj and shift_obj:
-            print("section obj", section_obj)
             list(
                 map(
                     lambda data: data.update(
@@ -126,12 +103,12 @@ class TimeTableViewSet(CommonInfoViewSet):
                             "grade": grade_obj,
                             "shift": shift_obj,
                             "section": section_obj,
+                            "day": day,
                         }
                     ),
                     request.data,
                 )
             )
-
             serializer = TimeTableSerializer(data=request.data, many=True)
             if serializer.is_valid():
                 response = create_timetable(
