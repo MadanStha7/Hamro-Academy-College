@@ -22,9 +22,7 @@ class StudentDocumentViewSet(CommonInfoViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        # document = self.request.data.get("document")
         student = self.request.query_params.get("student")
-        print(self.request.query_params.get("student"))
 
         if self.request.institution:
             serializer.save(

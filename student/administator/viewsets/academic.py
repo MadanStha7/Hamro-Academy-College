@@ -26,10 +26,10 @@ class StudentAcademicViewSet(CommonInfoViewSet):
 
     def perform_create(self, serializer):
         serializer.validated_data.get("previous_academic").update({
-            "created_by":self.request.user, "institution": self.request.institution})
+            "created_by": self.request.user, "institution": self.request.institution})
         serializer.validated_data.get("student_academic").update({
-            "created_by":self.request.user, "institution": self.request.institution,
-            "academic_session":active_academic_session(self.request.institution)})
+            "created_by": self.request.user, "institution": self.request.institution,
+            "academic_session": active_academic_session(self.request.institution)})
         serializer.save()
 
     def create(self, request, *args, **kwargs):

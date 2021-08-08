@@ -1,9 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import F
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from common.administrator.viewset import CommonInfoViewSet
@@ -36,7 +34,7 @@ class StudentInfoViewSet(CommonInfoViewSet):
         """api to get list of serialzer of student"""
         queryset = StudentInfo.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(
-            phone = F("user__phone"),
+            phone=F("user__phone"),
             student_first_name=F("user__first_name"),
             student_last_name=F("user__last_name"),
             guardian_first_name=F("guardian_detail__user__first_name"),
@@ -44,14 +42,13 @@ class StudentInfoViewSet(CommonInfoViewSet):
             guardian_phone_number=F("guardian_detail__phone"),
 
         )
-        print("sgsg")
         serializer = StudentListInfoSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        # photo = self.request.data.get("photo")
+        photo = self.request.data.get("photo")
         serializer.save(
-
+            photo=photo,
             created_by=self.request.user,
             institution=self.request.institution,
         )

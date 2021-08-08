@@ -9,8 +9,6 @@ class StudentDocumentSerializer(serializers.ModelSerializer):
 
     document = serializers.CharField()
 
-    def get_document_name(self, obj):
-        return StudentDocument.objects.filter(student=obj.student).values("document")
 
     class Meta:
         model = StudentDocument
@@ -20,7 +18,6 @@ class StudentDocumentSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         document = validated_data.pop("document")
-        print(validated_data)
         document = StudentDocument.objects.create(
                 document=to_internal_value(document), **validated_data)
 

@@ -5,9 +5,9 @@ from django.db import transaction
 from rest_framework import serializers
 
 from common.constant import SYSTEM_DEFAULT_PASSWORD
-from common.utils import validate_unique_phone
+from common.utils import validate_unique_phone, to_internal_value
+from staff.administrator.serializers.staff import UserSerializer
 from student.models import StudentInfo
-from user.common.serializers.user import UserSerializer
 
 
 User = get_user_model()
@@ -33,7 +33,6 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
             "student_last_name",
             "phone",
             "photo",
-
             "guardian_first_name",
             "guardian_last_name",
             "guardian_phone_number",
@@ -45,11 +44,14 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
 class StudentInfoSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     category_name = serializers.CharField(read_only=True)
+    photo = serializers.SerializerMethodField(read_only=True, required=False, allow_null=True)
+
+    def get_photo(self, obj):
+        return obj.photo.url if obj.photo else None
 
     class Meta:
         model = StudentInfo
         read_only_fields = [
-            "photo",
             "institution",
             "created_by",
             "created_on",
@@ -93,30 +95,47 @@ class StudentInfoSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         with transaction.atomic():
-
+            photo = validated_data.pop("photo")
             user = validated_data.pop("user")
+            all_name = user["full_name"].strip().split()
+            first_name, last_name = all_name[0], all_name[1:]
+            last_name_all = " ".join(last_name)
             user = User.objects.create(
-                first_name=user.get("first_name"),
-                last_name=user.get("last_name"),
-                email=user.get("email"),
                 phone=user.get("phone"),
+                first_name=first_name,
+                last_name=last_name_all,
+                email=user.get("email"),
                 institution=self.context.get("institution"),
             )
             student = StudentInfo.objects.create(user=user, **validated_data)
             student.user.username = student.admission_number
             user.set_password(SYSTEM_DEFAULT_PASSWORD)
             student.user.save()
+            if photo:
+                student.photo = to_internal_value(photo)
+                student.save()
+
             return student
 
     def update(self, instance, validated_data, *args, **kwargs):
         with transaction.atomic():
-            if validated_data.get("user"):
-                student_data = validated_data.pop("user")
-                student_user_serializer = UserSerializer(
-                    data=student_data, instance=instance.user
-                )
-                student_user_serializer.is_valid(raise_exception=True)
-                student_user_serializer.save()
-            return super(StudentInfoSerializer, self).update(instance, validated_data)
+            user_data = validated_data.pop("user")
+            users_obj = self.instance.user
+            instance.photo = validated_data.get("photo", instance.photo)
+            instance.permanent_address = validated_data.get("permanent_address", instance.permanent_address)
+            instance.temporary_address = validated_data.get("temporary_address", instance.temporary_address)
+            instance.dob = validated_data.get("dob", instance.dob)
+            userserializer = UserSerializer(users_obj, data=user_data, partial=True)
+            if userserializer.is_valid(raise_exception=True):
+                all_name = userserializer.validated_data["full_name"].strip().split()
+                first_name, last_name = all_name[0], all_name[1:]
+                userserializer.save()
+                last_name_all = " ".join(last_name)
+                user_data_obj = User.objects.get(id=self.instance.user.id)
+                user_data_obj.first_name = first_name
+                user_data_obj.last_name = last_name_all
+                user_data_obj.save()
+            return instance
+
 
 

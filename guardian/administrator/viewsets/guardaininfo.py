@@ -24,6 +24,14 @@ class GuardianInfoViewSet(CommonInfoViewSet):
 
         return queryset
 
+    def perform_create(self, serializer):
+        photo = self.request.data.get("photo")
+        serializer.save(
+            photo=photo,
+            created_by=self.request.user,
+            institution=self.request.institution,
+        )
+
     @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
         """
@@ -61,9 +69,11 @@ class StudentGuardianInfoView(CreateAPIView):
                 return Response({"message": "success"}, status=status.HTTP_200_OK)
 
             elif new == "true":
+                photo = self.request.data.get("photo")
                 serializer = GuardianInfoSerializer(data=request.data)
                 serializer.is_valid(raise_exception=True)
                 guardian = serializer.save(
+                    photo=photo,
                     created_by=self.request.user,
                     institution=self.request.institution)
                 student = get_object_or_404(
