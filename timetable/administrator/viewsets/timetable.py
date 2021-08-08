@@ -42,18 +42,16 @@ class TimeTableViewSet(CommonInfoViewSet):
         day = self.request.query_params.get("day", False)
 
         queryset = TimeTable.objects.filter(institution=self.request.institution)
-
         if faculty:
-            queryset = queryset.filter(faculty__name__icontains=faculty)
+            queryset = queryset.filter(faculty=faculty)
         if grade:
-            queryset = queryset.filter(grade__name=grade)
-            print("que", queryset)
+            queryset = queryset.filter(grade=grade)
 
         if section:
-            queryset = queryset.filter(section__name__icontains=section)
+            queryset = queryset.filter(section=section)
 
         if shift:
-            queryset = queryset.filter(shift__name__icontains=shift)
+            queryset = queryset.filter(shift=shift)
 
         if day:
             queryset = queryset.filter(day=day)
@@ -61,7 +59,7 @@ class TimeTableViewSet(CommonInfoViewSet):
             subject__name=F("subject__name"),
             teacher__firstname=F("teacher__first_name"),
             teacher__lastname=F("teacher__last_name"),
-        )
+        ).order_by("start_time")
 
         serializer = TimetableListSerialzer(queryset, many=True)
         timetables = defaultdict(list)
@@ -93,6 +91,8 @@ class TimeTableViewSet(CommonInfoViewSet):
             section_obj = get_object_or_404(Section, id=section)
         else:
             section_obj = None
+        print("request data###", request.data)
+        print("faculty_obj###", type(faculty_obj))
 
         if faculty_obj and grade_obj and shift_obj:
             list(
@@ -115,7 +115,7 @@ class TimeTableViewSet(CommonInfoViewSet):
                     request.data, self.request.user, self.request.institution
                 )
                 serializer = TimeTableSerializer(
-                    response["timetable_create"], many=True
+                    response["data1"] + response["data2"], many=True
                 )
                 if response:
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
