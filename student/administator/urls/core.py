@@ -1,6 +1,4 @@
 from .student import urlpatterns as student_urls
-
-
 from .category import urlpatterns as category_urls
 from .academic import urlpatterns as student_academic_urls
 from .previous_academic import urlpatterns as previous_academic_urls
