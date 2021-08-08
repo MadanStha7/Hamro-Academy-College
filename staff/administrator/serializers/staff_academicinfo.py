@@ -18,7 +18,7 @@ class StaffAcademicInfoSerializer(serializers.ModelSerializer):
             "experience",
             "working_days",
             "leave",
-            "previouse_academic_details",
+            "previous_academic_details",
             "previous_college_name",
             "full_address",
         ]
@@ -73,8 +73,8 @@ class StaffAcademicInfoSerializer(serializers.ModelSerializer):
             "working_days", instance.working_days
         )
         instance.leave = validated_data.get("leave", instance.leave)
-        instance.previouse_academic_details = validated_data.get(
-            "previouse_academic_details", instance.previouse_academic_details
+        instance.previous_academic_details = validated_data.get(
+            "previous_academic_details", instance.previous_academic_details
         )
         instance.previous_college_name = validated_data.get(
             "previous_college_name", instance.previous_college_name
