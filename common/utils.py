@@ -120,8 +120,6 @@ def validate_unique_faculty_grade(model, value, institution, instance):
 
 def validate_unique_phone(model, phone, institution, instance):
     if instance:
-        print("instance", ~Q(instance.id))
-        print("instance", model)
 
         if model.objects.filter(
                 ~Q(id=instance.user.id), phone=phone, institution=institution

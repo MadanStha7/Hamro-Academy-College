@@ -54,7 +54,7 @@ class Staff(CommonInfo):
     spouse_name = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.get_full_name()}-{self.institution.name}"
+        return str(self.id)
 
     class Meta:
         db_table = "staff"
@@ -77,7 +77,7 @@ class StaffAcademicInfo(CommonInfo):
     leave = models.FloatField(
         default=0, help_text="Staff's leave days", null=True, blank=True
     )
-    previouse_academic_details = models.BooleanField(default=False)
+    previous_academic_details = models.BooleanField(default=False)
     previous_college_name = models.CharField(max_length=40, null=True, blank=True)
     full_address = models.TextField(null=True, blank=True)
 

@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from staff.models import Staff
 from common.utils import validate_unique_phone, validate_unique_email
+from academics.models import Faculty, Grade
+from common.utils import to_internal_value
 from django.db import transaction
 from django.contrib.auth import get_user_model
-from academics.models import Faculty, Grade
 from datetime import date
 
 User = get_user_model()
@@ -21,6 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StaffSerializer(serializers.ModelSerializer):
+    photo = serializers.CharField()
     designation__name = serializers.CharField(read_only=True)
     user = UserSerializer()
 
@@ -67,8 +69,9 @@ class StaffSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def create(self, validated_data):
         user = validated_data.pop("user")
-        all_name = user["full_name"].strip().split()
-        first_name, last_name = all_name[0], all_name[1:]
+        photo = validated_data.pop("photo")
+        full_name = user["full_name"].strip().split()
+        first_name, last_name = full_name[0], full_name[1:]
         last_name_all = " ".join(last_name)
         user = User.objects.create(
             phone=user.get("phone"),
@@ -77,7 +80,9 @@ class StaffSerializer(serializers.ModelSerializer):
             last_name=last_name_all,
             institution=self.context.get("institution"),
         )
-        staff = Staff.objects.create(user=user, **validated_data)
+        staff = Staff.objects.create(
+            user=user, photo=to_internal_value(photo), **validated_data
+        )
         return staff
 
     @transaction.atomic
@@ -90,8 +95,8 @@ class StaffSerializer(serializers.ModelSerializer):
         instance.dob = validated_data.get("dob", instance.dob)
         userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
         if userSerializer.is_valid(raise_exception=True):
-            all_name = userSerializer.validated_data["full_name"].strip().split()
-            first_name, last_name = all_name[0], all_name[1:]
+            full_name = userSerializer.validated_data["full_name"].strip().split()
+            first_name, last_name = full_name[0], full_name[1:]
             userSerializer.save()
             last_name_all = " ".join(last_name)
             user_data_obj = User.objects.get(id=self.instance.user.id)
@@ -103,15 +108,12 @@ class StaffSerializer(serializers.ModelSerializer):
 
 class StaffListSerializer(serializers.ModelSerializer):
     designation__name = serializers.CharField(read_only=True)
-    contact_number = serializers.CharField(read_only=True)
-    email = serializers.CharField(read_only=True)
+    contact__number = serializers.CharField(read_only=True)
+    staff__email = serializers.CharField(read_only=True)
     gender_name = serializers.CharField(source="get_gender_display", read_only=True)
     religion_name = serializers.CharField(source="get_religion_display", read_only=True)
     blood_group_name = serializers.CharField(
         source="get_blood_group_display", read_only=True
-    )
-    teacher_full_name = serializers.CharField(
-        source="user.get_full_name", read_only=True
     )
 
     class Meta:
@@ -125,7 +127,6 @@ class StaffListSerializer(serializers.ModelSerializer):
             "religion_name",
             "designation__name",
             "gender_name",
-            "teacher_full_name",
-            "contact_number",
-            "email",
+            "contact__number",
+            "staff__email",
         ]
