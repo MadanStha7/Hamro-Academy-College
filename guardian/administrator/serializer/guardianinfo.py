@@ -57,7 +57,6 @@ class GuardianInfoSerializer(serializers.ModelSerializer):
                 institution=self.context.get("institution"),
             )
             guardian = StudentGuardianInfo.objects.create(user=user, **validated_data)
-            guardian.user.save()
             if photo:
                 guardian.photo = to_internal_value(photo)
                 guardian.save()
