@@ -8,15 +8,12 @@ from student.models import StudentDocument
 class StudentDocumentSerializer(serializers.ModelSerializer):
 
     document = serializers.CharField()
-    document_url = serializers.SerializerMethodField(required=False, allow_null=True)
 
-    def get_document_url(self, obj):
-        return obj.document.url if obj.document else None
 
     class Meta:
         model = StudentDocument
         read_only_fields = ["institution", "created_by", "student"]
-        fields = ["id", "student", "document_url", "document", "name"]
+        fields = ["id", "student", "document", "name"]
 
     @transaction.atomic
     def create(self, validated_data):
