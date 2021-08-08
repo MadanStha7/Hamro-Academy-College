@@ -98,3 +98,9 @@ DAYS_CHOICES = (
     (6, "SAT"),
     (7, "SUN"),
 )
+
+MARITAL_STATUS = (
+    ("M", "Male"),
+    ("F", "F"),
+    ("O", "Others"),
+)
