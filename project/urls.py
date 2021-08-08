@@ -15,9 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView, TokenVerifyView
 from authentication.views import CustomTokenObtainPairView
 from common.utils import encode_image
 
@@ -28,6 +26,7 @@ urlpatterns = [
     ),
     path("api/v1/encode-image/", encode_image),
     path("api/v1/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/v1/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
     path("api/v1/", include("user.urls")),
     path("api/v1/", include("core.urls")),
     path("api/v1/", include("academics.urls")),
@@ -37,4 +36,5 @@ urlpatterns = [
     path("api/v1/", include("guardian.urls")),
     path("api/v1/", include("staff.urls")),
     path("api/v1/", include("timetable.urls")),
+    # path("api/v1/", include("onlineclass.urls")),
 ]
