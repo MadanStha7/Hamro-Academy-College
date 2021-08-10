@@ -24,7 +24,9 @@ class ClassSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
-        res["section_data"] = SectionSerializer(instance.section.all(), many=True).data
+        res["section_data"] = SectionSerializer(
+            instance.section.all().values("id", "name"), many=True
+        ).data
         return res
 
     def validate(self, attrs):
