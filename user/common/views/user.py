@@ -30,7 +30,9 @@ class UserChangePasswordView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = UserChangePasswordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, id=request.data.get("user"))
+        user = get_object_or_404(
+            User, id=request.data.get("user"), institution=self.request.institution
+        )
         old_password = self.request.data.get("old_password")
         if not user.check_password(old_password):
             raise ValidationError({"old_password": ["Old password is not correct"]})
