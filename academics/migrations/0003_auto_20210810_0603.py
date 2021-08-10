@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
                 ('days', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(choices=[('1', 'MON'), ('2', 'TUE'), ('3', 'WED'), ('4', 'THU'), ('5', 'FRI'), ('6', 'SAT'), ('7', 'SUN')], max_length=1), blank=True, default=list, null=True, size=None)),
                 ('start_time', models.TimeField()),
                 ('end_time', models.TimeField()),
-                ('link', models.CharField(max_length=253)),
+                ('link_code', models.CharField(max_length=253)),
                 ('academic_session', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='onlineclass_academic_session', to='general.academicsession')),
                 ('created_by', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='academics_onlineclassinfo_created', to=settings.AUTH_USER_MODEL, verbose_name='Created by')),
                 ('faculty', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='onlineclass_faculty', to='academics.faculty')),
