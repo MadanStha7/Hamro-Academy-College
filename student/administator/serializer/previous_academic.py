@@ -8,7 +8,7 @@ class PreviousAcademicSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = PreviousAcademicDetail
-        read_only_fields = ["created_by", "institution"]
+        read_only_fields = ["created_by", "institution", "student"]
         fields = [
             "id",
             "student",

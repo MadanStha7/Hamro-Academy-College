@@ -20,5 +20,4 @@ class StudentDocumentSerializer(serializers.ModelSerializer):
         document = validated_data.pop("document")
         document = StudentDocument.objects.create(
                 document=to_internal_value(document), **validated_data)
-
         return document

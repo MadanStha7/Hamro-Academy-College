@@ -57,7 +57,7 @@ class StudentInfo(CommonInfo):
     disable = models.BooleanField(default=False, db_index=True)
 
     def __str__(self):
-        return f"{self.admission_number}"
+        return  f"{self.user.get_full_name()}"
 
     class Meta:
         ordering = ["-created_on"]
@@ -72,7 +72,7 @@ class StudentDocument(CommonInfo):
     name = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.student.user.get_first_name()}"
+        return f"{self.student.user.get_full_name()}"
 
     class Meta:
         db_table = "student_document"

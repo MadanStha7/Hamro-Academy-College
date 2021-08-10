@@ -15,7 +15,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentAcademicDetail
 
-        read_only_fields = ["created_by", "institution", "academic_session"]
+        read_only_fields = ["created_by", "institution", "academic_session", "student"]
         fields = [
             "id",
             "student",
@@ -31,7 +31,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
         ]
 
 
-class StudentAcademicDetailsSerializer(serializers.Serializer):
+class StudentAcademicDetailSerializer(serializers.Serializer):
     previous_academic = PreviousAcademicSerializer()
     student_academic = StudentAcademicSerializer()
     created_by = serializers.CharField(read_only=True)
@@ -43,11 +43,9 @@ class StudentAcademicDetailsSerializer(serializers.Serializer):
             student_academics = validated_data.pop("student_academic")
             previous_academic = PreviousAcademicDetail.objects.create(
                 **previous_details
-
             )
-            student_academic = StudentAcademicDetail.objects.create(
-                **student_academics
-
-            )
-
-            return student_academic
+            if not StudentAcademicDetail.objects.filter(student=student_academics.get("student"),
+                                                        academic_session__status=True):
+                student_academic = StudentAcademicDetail.objects.create(**student_academics)
+                return student_academic
+            return student_academics
