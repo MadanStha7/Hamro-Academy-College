@@ -31,7 +31,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
         ]
 
 
-class StudentAcademicDetailsSerializer(serializers.Serializer):
+class StudentAcademicDetailSerializer(serializers.Serializer):
     previous_academic = PreviousAcademicSerializer()
     student_academic = StudentAcademicSerializer()
     created_by = serializers.CharField(read_only=True)
