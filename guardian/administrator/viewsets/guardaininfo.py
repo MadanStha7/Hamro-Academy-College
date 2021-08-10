@@ -1,6 +1,7 @@
-
+from django_filters import rest_framework as filters
 from rest_framework.generics import CreateAPIView, get_object_or_404
 from common.administrator.viewset import CommonInfoViewSet
+from guardian.administrator.custom_filter import StudentGuardianFilter
 from guardian.administrator.serializer.guardianinfo import (
     GuardianInfoSerializer
 )
@@ -13,6 +14,8 @@ from rest_framework import status
 class GuardianInfoViewSet(CommonInfoViewSet):
     queryset = StudentGuardianInfo.objects.none()
     serializer_class = GuardianInfoSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = StudentGuardianFilter
 
     def get_queryset(self):
         """
@@ -39,8 +42,6 @@ class GuardianInfoViewSet(CommonInfoViewSet):
         """
         instance = self.get_object()
         obj = self.get_object().id
-        if instance.secondary_guardian:
-            instance.secondary_guardian.delete()
         instance.user.delete()
         self.perform_destroy(instance)
         return Response(
