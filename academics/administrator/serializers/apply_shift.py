@@ -1,7 +1,5 @@
 from academics.models import ApplyShift
-from common.utils import validate_unique_faculty_grade
 from rest_framework import serializers
-from django.db import transaction
 
 
 class ApplyShiftSerializer(serializers.ModelSerializer):
@@ -28,20 +26,3 @@ class ApplyShiftSerializer(serializers.ModelSerializer):
             "created_by",
             "institution",
         ]
-
-    @transaction.atomic
-    def create(self, validated_data):
-        faculty_data = validated_data.pop("faculty")
-        grade_data = validated_data.pop("grade")
-        shift_data = validated_data.pop("shift")
-        section_data = validated_data.pop("section")
-        instance, created = ApplyShift.objects.update_or_create(
-            faculty=faculty_data,
-            grade=grade_data,
-            shift=shift_data,
-            defaults={**validated_data},
-        )
-        if section_data is not None:
-            instance.section.set(section_data)
-            instance.save()
-        return instance

@@ -1,9 +1,12 @@
 from django.db.models import F
+from rest_framework import status
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-
-from academics.models import ApplyShift
+from rest_framework.decorators import action
+from academics.models import ApplyShift, Faculty, Grade
 from academics.administrator.serializers.apply_shift import ApplyShiftSerializer
 from common.administrator.viewset import CommonInfoViewSet
+from common.utils import create_applyshift
 
 
 class ApplyShiftViewSet(CommonInfoViewSet):
@@ -21,17 +24,48 @@ class ApplyShiftViewSet(CommonInfoViewSet):
         )
         return queryset
 
-    # def perform_create(self, serializer):
-    #     grade = self.request.data.get("grade")
-    #     shift = self.request.data.get("shift")
-    #     faculty = self.request.data.get("faculty")
-    #     section = self.request.data.get("section")
-    #     applyshift = ApplyShift.objects.filter(grade__id=grade, shift__id=shift, faculty__id=faculty)
-    #     print(applyshift)
-    #
-    #     if applyshift:
-    #         return Response(
-    #             {"message": ["ApplyShift with this data already exists."]}
-    #         )
-    #     else:
-    #         ApplyShift.objects.filter(grade=grade, shift=shift, faculty=faculty).update(section=section)
+    @action(detail=False, methods=["POST", "PUT"])
+    def save_apply_shift(self, request):
+        faculty = self.request.query_params.get("faculty", False)
+        grade = self.request.query_params.get("grade", False)
+
+        if faculty:
+            faculty_obj = get_object_or_404(Faculty, id=faculty)
+
+        if grade:
+            grade_obj = get_object_or_404(Grade, id=grade)
+
+        if faculty_obj and grade_obj:
+            list(
+                map(
+                    lambda data: data.update(
+                        {
+                            "faculty": faculty_obj.id,
+                            "grade": grade_obj.id,
+                        }
+                    ),
+                    request.data,
+                )
+            )
+            serializer = ApplyShiftSerializer(data=request.data, many=True)
+
+            if serializer.is_valid():
+                response = create_applyshift(
+                    request.data, self.request.user, self.request.institution
+                )
+                serializer = ApplyShiftSerializer(
+                    response["data1"] + response["data2"], many=True
+                )
+                if response:
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(
+                    {"error": serializer.errors},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+        else:
+            return Response(
+                {"error": ["please provide the required field in query params"]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
