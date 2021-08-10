@@ -138,7 +138,7 @@ class ApplyShift(CommonInfo):
     grade = models.ForeignKey(
         Grade, related_name="apply_shift", on_delete=models.CASCADE
     )
-    section = models.ForeignKey(Section, related_name="apply_shift", on_delete=models.CASCADE)
+    section = models.ForeignKey(Section, related_name="apply_shift", on_delete=models.CASCADE, blank=True, null=True)
     faculty = models.ForeignKey(
         Faculty, related_name="apply_shift", on_delete=models.CASCADE
     )
