@@ -18,26 +18,27 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
     student_last_name = serializers.CharField(read_only=True)
     guardian_first_name = serializers.CharField(read_only=True)
     guardian_last_name = serializers.CharField(read_only=True)
-    guardian_phone_number = serializers.CharField(read_only=True)
-    roll_number = serializers.CharField(read_only=True)
-    blood_group = serializers.CharField(source="get_blood_group_display")
+    faculty = serializers.CharField(read_only=True)
+    grade = serializers.CharField(read_only=True)
+    section = serializers.CharField(read_only=True)
+    relation = serializers.CharField(read_only=True)
     phone = serializers.CharField(read_only=True)
+    email = serializers.CharField(read_only=True)
 
     class Meta:
         model = StudentInfo
         fields = [
             "id",
-            "roll_number",
-            "admission_number",
             "student_first_name",
             "student_last_name",
-            "phone",
-            "photo",
+            "faculty",
+            "grade",
+            "section",
             "guardian_first_name",
             "guardian_last_name",
-            "guardian_phone_number",
-            "temporary_address",
-            "blood_group",
+            "relation",
+            "phone",
+            "email"
         ]
 
 
