@@ -33,7 +33,12 @@ class StaffViewSet(CommonInfoViewSet):
         filters.OrderingFilter,
         DjangoFilterBackend,
     ]
-    search_fields = ["user__first_name", "user__last_name", "user__email"]
+    search_fields = [
+        "user__first_name",
+        "user__last_name",
+        "user__email",
+        "user__phone",
+    ]
     filter_class = StaffFilter
 
     def get_queryset(self):
@@ -49,10 +54,10 @@ class StaffViewSet(CommonInfoViewSet):
         queryset = self.filter_queryset(queryset)
         queryset = queryset.annotate(
             designation__name=F("designation__name"),
-            contact__number=F("user__phone"),
-            staff__email=F("user__email"),
-            staff__first_name=F("user__first_name"),
-            staff__last_name=F("user__last_name"),
+            staff_contact_number=F("user__phone"),
+            staff_email=F("user__email"),
+            staff_first_name=F("user__first_name"),
+            staff_last_name=F("user__last_name"),
         )
         page = self.paginate_queryset(queryset)
         serializer = StaffListSerializer(page, many=True)
