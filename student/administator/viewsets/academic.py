@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from common.administrator.viewset import CommonInfoViewSet
 from common.utils import active_academic_session
 from student.administator.custom_fiter import StudentAcademicFilter
-from student.administator.serializer.academic import StudentAcademicSerializer, StudentAcademicDetailsSerializer
+from student.administator.serializer.academic import StudentAcademicSerializer,StudentAcademicDetailSerializer
 from student.models import StudentAcademicDetail, StudentInfo
 
 
@@ -48,7 +48,7 @@ class StudentAcademicViewSet(CommonInfoViewSet):
             )
 
     def create(self, request, *args, **kwargs):
-        serializer = StudentAcademicDetailsSerializer(data=request.data)
+        serializer = StudentAcademicDetailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(
