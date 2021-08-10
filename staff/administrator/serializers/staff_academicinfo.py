@@ -20,6 +20,8 @@ class StaffAcademicInfoSerializer(serializers.ModelSerializer):
             "leave",
             "previous_academic_details",
             "previous_college_name",
+            "previous_email",
+            "previous_contact",
             "full_address",
         ]
 
@@ -78,6 +80,12 @@ class StaffAcademicInfoSerializer(serializers.ModelSerializer):
         )
         instance.previous_college_name = validated_data.get(
             "previous_college_name", instance.previous_college_name
+        )
+        instance.previous_email = validated_data.get(
+            "previous_email", instance.previous_email
+        )
+        instance.previous_contact = validated_data.get(
+            "previous_contact", instance.previous_contact
         )
         instance.full_address = validated_data.get(
             "full_address", instance.full_address
