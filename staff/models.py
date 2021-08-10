@@ -79,10 +79,12 @@ class StaffAcademicInfo(CommonInfo):
     )
     previous_academic_details = models.BooleanField(default=False)
     previous_college_name = models.CharField(max_length=40, null=True, blank=True)
+    previous_college_email = models.EmailField(max_length=40, null=True, blank=True)
+    previous_college_contact = models.CharField(max_length=40, null=True, blank=True)
     full_address = models.TextField(null=True, blank=True)
 
     def __str__(self):
-        return self.staff.phone
+        return str(self.id)
 
     class Meta:
         db_table = "staff_academic_info"

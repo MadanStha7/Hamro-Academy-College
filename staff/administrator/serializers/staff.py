@@ -108,8 +108,10 @@ class StaffSerializer(serializers.ModelSerializer):
 
 class StaffListSerializer(serializers.ModelSerializer):
     designation__name = serializers.CharField(read_only=True)
-    contact__number = serializers.CharField(read_only=True)
-    staff__email = serializers.CharField(read_only=True)
+    staff_contact_number = serializers.CharField(read_only=True)
+    staff_email = serializers.CharField(read_only=True)
+    staff_first_name = serializers.CharField(read_only=True)
+    staff_last_name = serializers.CharField(read_only=True)
     gender_name = serializers.CharField(source="get_gender_display", read_only=True)
     religion_name = serializers.CharField(source="get_religion_display", read_only=True)
     blood_group_name = serializers.CharField(
@@ -127,6 +129,20 @@ class StaffListSerializer(serializers.ModelSerializer):
             "religion_name",
             "designation__name",
             "gender_name",
-            "contact__number",
-            "staff__email",
+            "staff_contact_number",
+            "staff_email",
+            "staff_first_name",
+            "staff_last_name",
         ]
+
+
+class StaffAssignSerialzer(serializers.ModelSerializer):
+    phone = serializers.CharField()
+    roles = serializers.SerializerMethodField()
+
+    def get_roles(self, obj):
+        return obj.roles.all().values("title")
+
+    class Meta:
+        model = User
+        fields = ("id", "phone", "roles")

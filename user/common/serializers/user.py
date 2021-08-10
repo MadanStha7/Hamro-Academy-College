@@ -28,3 +28,10 @@ class UserSerializer(serializers.ModelSerializer):
                 "length of phone number should be greater than or equal to 10 and less than or equal to 13"
             )
         return value
+
+
+class UserChangePasswordSerializer(serializers.Serializer):
+    user = serializers.UUIDField(write_only=True)
+    password1 = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
+    old_password = serializers.CharField(write_only=True)
