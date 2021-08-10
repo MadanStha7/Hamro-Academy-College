@@ -66,7 +66,7 @@ class CommonInfoViewSet(viewsets.ModelViewSet):
         try:
             self.perform_destroy(instance)
             return Response(
-                {"message": [f"object {obj} successfully  deleted"]},
+                {"id": [obj], "message": [f"object {obj} successfully  deleted"]},
                 status=status.HTTP_200_OK,
             )
         except ProtectedError:
