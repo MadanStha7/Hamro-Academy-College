@@ -1,4 +1,5 @@
-from django_filters import rest_framework as filters
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import CreateAPIView, get_object_or_404
 from common.administrator.viewset import CommonInfoViewSet
 from guardian.administrator.custom_filter import StudentGuardianFilter
@@ -14,7 +15,8 @@ from rest_framework import status
 class GuardianInfoViewSet(CommonInfoViewSet):
     queryset = StudentGuardianInfo.objects.none()
     serializer_class = GuardianInfoSerializer
-    filter_backends = (filters.DjangoFilterBackend,)
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    search_fields = ["user__first_name", "user__last_name", "user__phone"]
     filter_class = StudentGuardianFilter
 
     def get_queryset(self):
@@ -24,7 +26,7 @@ class GuardianInfoViewSet(CommonInfoViewSet):
         queryset = StudentGuardianInfo.objects.filter(
             institution=self.request.institution
         )
-
+        queryset = self.filter_queryset(queryset)
         return queryset
 
     def perform_create(self, serializer):
