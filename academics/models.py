@@ -62,6 +62,7 @@ class Subject(CommonInfo):
     credit_hour = models.FloatField()
     subject_code = models.CharField(max_length=10)
     subject_type = models.CharField(max_length=1, choices=SUBJECT_TYPES)
+    is_optional = models.BooleanField(default=False)
 
     class Meta:
         db_table = "academics_subjects"
