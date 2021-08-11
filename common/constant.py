@@ -104,9 +104,3 @@ MARITAL_STATUS = (
     ("F", "F"),
     ("O", "Others"),
 )
-
-class SystemRole(models.TextChoices):
-    STUDENT = "Student"
-    ADMINISTRATOR = "Administrator"
-    TEACHER = "Teacher"
-    PARENT = "Parent"
