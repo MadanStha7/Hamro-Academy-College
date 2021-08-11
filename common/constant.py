@@ -1,3 +1,4 @@
+from django.db import models
 MONTHS = (
     ("1", "Baishak"),
     ("2", "Jestha"),
@@ -104,3 +105,8 @@ MARITAL_STATUS = (
     ("F", "F"),
     ("O", "Others"),
 )
+
+
+class SystemRole(models.TextChoices):
+    TEACHER = "Teacher"
+   
