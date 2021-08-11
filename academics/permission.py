@@ -1,5 +1,6 @@
 from rest_framework.permissions import BasePermission
-from common.constant import SystemRole
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class TeacherPermission(BasePermission):
@@ -8,7 +9,8 @@ class TeacherPermission(BasePermission):
     """
 
     def has_permission(self, request, view):
-        if SystemRole.TEACHER in request.groups and request.password_updated:
+        if request.user.is_authenticated and request.user.roles.filter(title="Teacher"):
+            print("teacher")
             return True
         return False
 
