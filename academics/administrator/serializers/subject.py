@@ -14,6 +14,7 @@ class SubjectSerializer(serializers.ModelSerializer):
             "credit_hour",
             "subject_code",
             "subject_type",
+            "is_optional",
             "created_by",
             "institution",
         ]

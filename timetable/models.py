@@ -55,6 +55,7 @@ class TimeTable(CommonInfo):
 
     class Meta:
         db_table = "time_table"
+        ordering = ["-id"]
 
     def __str__(self):
-        return f"Time table of {self.grade}-{self.institution}"
+        return f"Time table of {str(self.id)}"
