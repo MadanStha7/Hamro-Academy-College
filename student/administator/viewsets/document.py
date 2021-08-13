@@ -12,7 +12,7 @@ from student.models import StudentDocument, StudentInfo
 
 class StudentDocumentViewSet(CommonInfoViewSet):
     """
-    CRUD for student category
+    CRUD for document of student
     """
 
     queryset = StudentDocument.objects.none()
