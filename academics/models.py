@@ -31,7 +31,7 @@ class Grade(CommonInfo):
         return super(Grade, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.institution}-{self.name}"
+        return f"{self.name}"
 
 
 class Faculty(CommonInfo):
@@ -135,11 +135,19 @@ class Class(CommonInfo):
 
 
 class ApplyShift(CommonInfo):
-    shift = models.ForeignKey(Shift, related_name="apply_shift", on_delete=models.CASCADE)
+    shift = models.ForeignKey(
+        Shift, related_name="apply_shift", on_delete=models.CASCADE
+    )
     grade = models.ForeignKey(
         Grade, related_name="apply_shift", on_delete=models.CASCADE
     )
-    section = models.ForeignKey(Section, related_name="apply_shift", on_delete=models.CASCADE, blank=True, null=True)
+    section = models.ForeignKey(
+        Section,
+        related_name="apply_shift",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
     faculty = models.ForeignKey(
         Faculty, related_name="apply_shift", on_delete=models.CASCADE
     )
