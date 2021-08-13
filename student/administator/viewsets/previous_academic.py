@@ -9,7 +9,7 @@ from student.models import  PreviousAcademicDetail
 
 class PreviousAcademicViewSet(CommonInfoViewSet):
     """
-    CRUD for student academic.
+    CRUD for previous academic of student.
     """
 
     queryset = PreviousAcademicDetail.objects.none()
