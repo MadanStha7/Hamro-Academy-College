@@ -49,10 +49,8 @@ class StaffAcademicInfoSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         faculty_data = validated_data.pop("faculty")
         shift_data = validated_data.pop("shift")
-
         for faculty in faculty_data:
             faculty_id = faculty.id
-
         for shift in shift_data:
             shift_id = shift.id
         staff_academic = StaffAcademicInfo.objects.create(**validated_data)
@@ -64,35 +62,9 @@ class StaffAcademicInfoSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         faculty_data = validated_data.pop("faculty")
         shift_data = validated_data.pop("shift")
-        faculty_obj = self.instance.faculty
-        shift_obj = self.instance.shift
-        instance.staff = validated_data.get("staff", instance.staff)
-        instance.highest_degree = validated_data.get(
-            "highest_degree", instance.highest_degree
-        )
-        instance.experience = validated_data.get("experience", instance.experience)
-        instance.working_days = validated_data.get(
-            "working_days", instance.working_days
-        )
-        instance.leave = validated_data.get("leave", instance.leave)
-        instance.previous_academic_details = validated_data.get(
-            "previous_academic_details", instance.previous_academic_details
-        )
-        instance.previous_college_name = validated_data.get(
-            "previous_college_name", instance.previous_college_name
-        )
-        instance.previous_college_email = validated_data.get(
-            "previous_college_email", instance.previous_college_email
-        )
-        instance.previous_college_contact = validated_data.get(
-            "previous_college_contact", instance.previous_college_contact
-        )
-        instance.full_address = validated_data.get(
-            "full_address", instance.full_address
-        )
-
         for faculty in faculty_data:
             instance.faculty.add(faculty)
         for shift in shift_data:
             instance.shift.add(shift)
+        super(StaffAcademicInfoSerializer, self).update(instance, validated_data)
         return instance
