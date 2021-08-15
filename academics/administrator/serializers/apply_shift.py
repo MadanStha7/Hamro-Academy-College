@@ -8,6 +8,7 @@ class ApplyShiftSerializer(serializers.ModelSerializer):
     shift_start_time = serializers.CharField(read_only=True)
     shift_end_time = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
+    section_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = ApplyShift
@@ -23,6 +24,7 @@ class ApplyShiftSerializer(serializers.ModelSerializer):
             "shift_start_time",
             "shift_end_time",
             "section",
+            "section_name",
             "created_by",
             "institution",
         ]
