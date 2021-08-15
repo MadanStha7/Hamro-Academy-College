@@ -51,7 +51,6 @@ class StaffSerializer(serializers.ModelSerializer):
         """check that faculty name is already exist"""
         phone = user.get("phone")
         email = user.get("email")
-
         # phone number between 10 to 15
         if len(phone) < 10 or len(phone) > 15:
             raise serializers.ValidationError("enter the correct phone number!")
@@ -89,10 +88,6 @@ class StaffSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user")
         users_obj = self.instance.user
-        instance.photo = validated_data.get("photo", instance.photo)
-        instance.designation = validated_data.get("designation", instance.designation)
-        instance.address = validated_data.get("address", instance.address)
-        instance.dob = validated_data.get("dob", instance.dob)
         userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
         if userSerializer.is_valid(raise_exception=True):
             full_name = userSerializer.validated_data["full_name"].strip().split()
@@ -103,6 +98,7 @@ class StaffSerializer(serializers.ModelSerializer):
             user_data_obj.first_name = first_name
             user_data_obj.last_name = last_name_all
             user_data_obj.save()
+        super(StaffSerializer, self).update(instance, validated_data)
         return instance
 
 
