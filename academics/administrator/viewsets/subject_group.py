@@ -7,8 +7,10 @@ from django_filters import rest_framework as filters
 
 class SubjectGroupViewSet(CommonInfoViewSet):
     """
-    Subject group list for the particular class.
+    CRUD for Subject Group .
     """
+
+
 
     queryset = SubjectGroup.objects.none()
     serializer_class = SubjectGroupSerializer
