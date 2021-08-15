@@ -1,8 +1,5 @@
 import django_filters
 from academics.models import ApplyShift
-
-
-
 from academics.models import SubjectGroup, OnlineClassInfo
 from timetable.models import TimeTable
 
