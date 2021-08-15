@@ -1,5 +1,7 @@
 from rest_framework.serializers import ValidationError
 from django.db import transaction, IntegrityError
+from rest_framework.response import Response
+from django.core.exceptions import BadRequest
 from common.utils import active_academic_session
 from timetable.models import TimeTable
 from academics.models import Section, Grade, Subject, Faculty, Shift
@@ -15,7 +17,6 @@ def create_timetable(infos, user, institution):
     """
     api to create a bulk timetable
     """
-    print("infos", infos)
     new_timetables = []
     updated_timetable = []
     active_session = active_academic_session(institution)
@@ -25,6 +26,8 @@ def create_timetable(infos, user, institution):
     # print("valid timetable",valid_timetable)
     # for case of update
     for info in infos:
+        if info.get("start_time") > info.get("end_time"):
+            raise ValidationError({"error": ["Start time must be greater than end date"]})
         get_id = info.get("id", None)
         if get_id:
             timetable = TimeTable(id=info.get("id"))
@@ -36,6 +39,8 @@ def create_timetable(infos, user, institution):
             timetable.faculty = Faculty(id=info.get("faculty").id)
             timetable.grade = Grade(id=info.get("grade").id)
             timetable.shift = Shift(id=info.get("shift").id)
+            if info.get("section"):
+                timetable.section = Section(id=info.get("section").id)
             updated_timetable.append(timetable)
 
         # for case of create
@@ -91,8 +96,11 @@ def create_apply_timetable(data, days, user, institution):
         active_session = active_academic_session(institution)
         # check the validation
         # valid_timetable = validate_timetable(infos,active_session,user, institution)
+        
         new_timetables = []
         for item in data:
+            if item.get("start_time") > item.get("end_time"):
+                raise ValidationError({"error": ["Start time must be greater than end date"]})
             timetable = TimeTable(
                 start_time=item.get("start_time"),
                 end_time=item.get("end_time"),
@@ -107,7 +115,7 @@ def create_apply_timetable(data, days, user, institution):
             )
 
             if item.get("section"):
-                timetable.section = item.get("section")
+                timetable.section = Section(id=item.get("section").id)
             new_timetables.append(timetable)
 
         day_id = [day for day in days if days.count(day) > 1]
@@ -122,8 +130,7 @@ def create_apply_timetable(data, days, user, institution):
             # print("day",timetable_data.__dict__)
             timetable_dict.update(timetable_data.__dict__["id"])
             final_timetable_data = timetable_dict.copy()
-            timetable_create.append(
-                TimeTable(
+            final_timetable = TimeTable(
                     start_time=final_timetable_data.get("start_time"),
                     end_time=final_timetable_data.get("end_time"),
                     teacher=User(id=final_timetable_data.get("teacher_id")),
@@ -138,7 +145,10 @@ def create_apply_timetable(data, days, user, institution):
                     ),
                     day=final_timetable_data.get("day"),
                 )
-            )
+            if final_timetable_data.get("section_id"):
+                final_timetable.section = Section(id=final_timetable_data.get("section_id"))
+            timetable_create.append(final_timetable)
+            
     with transaction.atomic():
         try:
             timetable_create_data = TimeTable.objects.bulk_create(timetable_create)
