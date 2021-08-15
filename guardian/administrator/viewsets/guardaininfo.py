@@ -13,6 +13,10 @@ from rest_framework import status
 
 
 class GuardianInfoViewSet(CommonInfoViewSet):
+    """
+    CRUD for guardian of student
+    """
+
     queryset = StudentGuardianInfo.objects.none()
     serializer_class = GuardianInfoSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
@@ -30,6 +34,9 @@ class GuardianInfoViewSet(CommonInfoViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        """
+        create guardian api
+        """
         photo = self.request.data.get("photo")
         serializer.save(
             photo=photo,
@@ -53,6 +60,10 @@ class GuardianInfoViewSet(CommonInfoViewSet):
 
 
 class StudentGuardianInfoView(CreateAPIView):
+    """
+      CRUD for new as well existing guardian of student
+      """
+
     queryset = StudentGuardianInfo.objects.none()
     serializer_class = GuardianInfoSerializer
 

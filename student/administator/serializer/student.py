@@ -128,8 +128,8 @@ class StudentInfoSerializer(serializers.ModelSerializer):
             instance.dob = validated_data.get("dob", instance.dob)
             userserializer = UserSerializer(users_obj, data=user_data, partial=True)
             if userserializer.is_valid(raise_exception=True):
-                all_name = userserializer.validated_data["full_name"].strip().split()
-                first_name, last_name = all_name[0], all_name[1:]
+                full_name = userserializer.validated_data["full_name"].strip().split()
+                first_name, last_name = full_name[0], full_name[1:]
                 userserializer.save()
                 last_name_all = " ".join(last_name)
                 user_data_obj = User.objects.get(id=self.instance.user.id)
