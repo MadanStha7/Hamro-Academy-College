@@ -32,14 +32,13 @@ class StudentInfoViewSet(CommonInfoViewSet):
 
     def get_queryset(self):
         queryset = StudentInfo.objects.filter(
-            institution=self.request.institution, student_academic_detail__academic_session__status=True
+            institution=self.request.institution
         )
         return queryset
 
     def list(self, request, *args, **kwargs):
         """api to get list of serializer of student"""
         institution = self.request.institution
-        active_academic_session(institution)
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
