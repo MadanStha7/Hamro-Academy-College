@@ -27,7 +27,9 @@ def create_timetable(infos, user, institution):
     # for case of update
     for info in infos:
         if info.get("start_time") > info.get("end_time"):
-            raise ValidationError({"error": ["Start time must be greater than end date"]})
+            raise ValidationError(
+                {"error": ["Start time must be greater than end date"]}
+            )
         get_id = info.get("id", None)
         if get_id:
             timetable = TimeTable(id=info.get("id"))
@@ -68,7 +70,7 @@ def create_timetable(infos, user, institution):
         except IntegrityError:
             raise ValidationError({"error": ["duplicate timetable is not allowed"]})
 
-        update_timetable_list = TimeTable.objects.bulk_update(
+        TimeTable.objects.bulk_update(
             updated_timetable,
             fields=[
                 "teacher",
@@ -96,11 +98,13 @@ def create_apply_timetable(data, days, user, institution):
         active_session = active_academic_session(institution)
         # check the validation
         # valid_timetable = validate_timetable(infos,active_session,user, institution)
-        
+
         new_timetables = []
         for item in data:
             if item.get("start_time") > item.get("end_time"):
-                raise ValidationError({"error": ["Start time must be greater than end date"]})
+                raise ValidationError(
+                    {"error": ["Start time must be greater than end date"]}
+                )
             timetable = TimeTable(
                 start_time=item.get("start_time"),
                 end_time=item.get("end_time"),
@@ -131,24 +135,26 @@ def create_apply_timetable(data, days, user, institution):
             timetable_dict.update(timetable_data.__dict__["id"])
             final_timetable_data = timetable_dict.copy()
             final_timetable = TimeTable(
-                    start_time=final_timetable_data.get("start_time"),
-                    end_time=final_timetable_data.get("end_time"),
-                    teacher=User(id=final_timetable_data.get("teacher_id")),
-                    faculty=Faculty(id=final_timetable_data.get("faculty_id")),
-                    grade=Grade(final_timetable_data.get("grade_id")),
-                    shift=Shift(final_timetable_data.get("shift_id")),
-                    subject=Subject(id=final_timetable_data.get("subject_id")),
-                    created_by=user,
-                    institution=institution,
-                    academic_session=AcademicSession(
-                        id=final_timetable_data.get("academic_session_id")
-                    ),
-                    day=final_timetable_data.get("day"),
-                )
+                start_time=final_timetable_data.get("start_time"),
+                end_time=final_timetable_data.get("end_time"),
+                teacher=User(id=final_timetable_data.get("teacher_id")),
+                faculty=Faculty(id=final_timetable_data.get("faculty_id")),
+                grade=Grade(final_timetable_data.get("grade_id")),
+                shift=Shift(final_timetable_data.get("shift_id")),
+                subject=Subject(id=final_timetable_data.get("subject_id")),
+                created_by=user,
+                institution=institution,
+                academic_session=AcademicSession(
+                    id=final_timetable_data.get("academic_session_id")
+                ),
+                day=final_timetable_data.get("day"),
+            )
             if final_timetable_data.get("section_id"):
-                final_timetable.section = Section(id=final_timetable_data.get("section_id"))
+                final_timetable.section = Section(
+                    id=final_timetable_data.get("section_id")
+                )
             timetable_create.append(final_timetable)
-            
+
     with transaction.atomic():
         try:
             timetable_create_data = TimeTable.objects.bulk_create(timetable_create)
