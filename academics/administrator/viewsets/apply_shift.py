@@ -6,12 +6,16 @@ from rest_framework.decorators import action
 from academics.models import ApplyShift, Faculty, Grade
 from academics.administrator.serializers.apply_shift import ApplyShiftSerializer
 from common.administrator.viewset import CommonInfoViewSet
-from common.utils import create_applyshift
+from academics.administrator.utils.create_applyshift import create_applyshift
+from django_filters import rest_framework as filters
+from academics.administrator.custom_filter import ApplyShiftFilter
 
 
 class ApplyShiftViewSet(CommonInfoViewSet):
     serializer_class = ApplyShiftSerializer
     queryset = ApplyShift.objects.none()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = ApplyShiftFilter
 
     def get_queryset(self):
         queryset = ApplyShift.objects.filter(institution=self.request.institution)
@@ -21,6 +25,7 @@ class ApplyShiftViewSet(CommonInfoViewSet):
             shift_end_time=F("shift__end_time"),
             grade_name=F("grade__name"),
             faculty_name=F("faculty__name"),
+            section_name=F("section__name"),
         )
         return queryset
 

@@ -1,15 +1,25 @@
 import django_filters
 
-from academics.models import SubjectGroup
-from timetable.models import TimeTable
+from academics.models import SubjectGroup, ApplyShift
+from common.constant import DAY
 
 
 class SubjectGroupFilter(django_filters.rest_framework.FilterSet):
-    grade = django_filters.UUIDFilter(field_name='grade__id', lookup_expr='exact')
-    section = django_filters.UUIDFilter(field_name='section__id', lookup_expr='exact')
-    faculty = django_filters.UUIDFilter(field_name='faculty__id', lookup_expr='exact')
-    subject = django_filters.UUIDFilter(field_name='subject__id', lookup_expr='exact')
+    grade = django_filters.UUIDFilter(field_name="grade__id", lookup_expr="exact")
+    section = django_filters.UUIDFilter(field_name="section__id", lookup_expr="exact")
+    faculty = django_filters.UUIDFilter(field_name="faculty__id", lookup_expr="exact")
+    subject = django_filters.UUIDFilter(field_name="subject__id", lookup_expr="exact")
 
     class Meta:
         model = SubjectGroup
         fields = ["grade", "section", "subject", "faculty"]
+
+
+class ApplyShiftFilter(django_filters.rest_framework.FilterSet):
+    grade = django_filters.UUIDFilter(field_name="grade__id", lookup_expr="exact")
+    section = django_filters.UUIDFilter(field_name="section__id", lookup_expr="exact")
+    faculty = django_filters.UUIDFilter(field_name="faculty__id", lookup_expr="exact")
+
+    class Meta:
+        model = ApplyShift
+        fields = ["grade", "section", "faculty"]
