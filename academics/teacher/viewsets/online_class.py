@@ -1,13 +1,11 @@
-from django.db.models import F
+from django.db.models import F, Value
 from rest_framework import status
 from django_filters import rest_framework as filters
-from rest_framework.generics import get_object_or_404, ListAPIView
+from rest_framework.generics import  ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from academics.administrator.custom_filter import OnlineClassFilter
-
-from academics.helpers import get_student_list_online_attendance
 from academics.teacher.serializers.online_class import OnlineClassInfoSerializer, \
     TeacherStudentOnlineClassAttendanceSerializer
 
@@ -15,7 +13,6 @@ from common.administrator.viewset import CommonInfoViewSet
 from common.utils import active_academic_session
 from onlineclass.models import OnlineClassInfo, StudentOnlineClassAttendance
 from permissions.teacher import TeacherPermission
-from project.custom.pagination import CustomPageSizePagination
 from student.helpers import get_online_class_attendance
 
 
@@ -67,28 +64,10 @@ class TeacherStudentOnlineClassAttendanceView(ListAPIView):
     permission_classes = (IsAuthenticated, TeacherPermission)
     serializer_class = TeacherStudentOnlineClassAttendanceSerializer
     queryset = StudentOnlineClassAttendance.objects.none()
-    filter_fields = ["student_academic"]
-    pagination_class = CustomPageSizePagination
 
     def get_queryset(self):
         online_class_attendance = get_online_class_attendance(self)
         return online_class_attendance
 
-    def list(self, request, *args, **kwargs):
-        online_class = self.request.query_params.get("online_class")
-        online_class_info = get_object_or_404(
-            OnlineClassInfo, id=online_class, created_by=self.request.user
-        )
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            student_academics = get_student_list_online_attendance(
-                online_class_info, self.request.general_info
-            )
-            data = serializer.data + list(student_academics)
-            return self.get_paginated_response(data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
