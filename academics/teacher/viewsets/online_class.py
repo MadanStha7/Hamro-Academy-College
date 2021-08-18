@@ -6,10 +6,11 @@ from rest_framework.response import Response
 
 from academics.administrator.custom_filter import OnlineClassFilter
 from academics.helpers import get_online_class_values, online_class_helper
-from academics.models import OnlineClassInfo
+
 from academics.teacher.serializers.online_class import OnlineClassInfoSerializer
 from common.administrator.viewset import CommonInfoViewSet
 from common.utils import active_academic_session
+from onlineclass.models import OnlineClassInfo
 from permissions.teacher import TeacherPermission
 
 
