@@ -22,6 +22,7 @@ class SubjectGroupListAPIView(ListAPIView):
         queryset = SubjectGroup.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(
             grade_name=F("grade__name"),
+            faculty_name=F("faculty__name"),
         )
         return queryset
 
@@ -37,6 +38,7 @@ class SubjectGroupRetrieveAPIView(RetrieveAPIView):
         try:
             return SubjectGroup.objects.annotate(
                 grade_name=F("grade__name"),
+                faculty_name=F("faculty__name"),
             ).get(id=self.kwargs.get("pk"), institution=self.request.institution)
         except SubjectGroup.DoesNotExist:
             raise ValidationError({"error": ["SubjectGroup object doesn't exist!"]})

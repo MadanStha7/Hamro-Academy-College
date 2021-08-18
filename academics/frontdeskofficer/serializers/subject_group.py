@@ -7,8 +7,7 @@ from common.utils import return_grade_name_of_value, validate_unique_name
 
 class SubjectGroupSerializer(serializers.ModelSerializer):
     grade_name = serializers.CharField(read_only=True)
-    subject = SubjectSerializer(read_only=True, many=True)
-    section = SectionSerializer(read_only=True, many=True)
+    faculty_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = SubjectGroup
@@ -18,10 +17,19 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
             "name",
             "subject",
             "section",
-            "grade",
-            "faculty",
             "description",
             "created_by",
             "institution",
             "grade_name",
+            "faculty_name",
         ]
+
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        res["subject"] = SectionSerializer(
+            instance.subject.all().values("name"), many=True
+        ).data
+        res["section"] = SectionSerializer(
+            instance.section.all().values("name"), many=True
+        ).data
+        return res
