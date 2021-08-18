@@ -71,7 +71,7 @@ class StudentInfoViewSet(CommonInfoViewSet):
     @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
         """
-            Delete guardian based on the db ACID transition
+            Delete student
             """
         instance = self.get_object()
         obj = self.get_object().id

@@ -118,25 +118,22 @@ class StudentInfoSerializer(serializers.ModelSerializer):
 
             return student
 
-    def update(self, instance, validated_data, *args, **kwargs):
-        with transaction.atomic():
-            user_data = validated_data.pop("user")
-            users_obj = self.instance.user
-            instance.photo = validated_data.get("photo", instance.photo)
-            instance.permanent_address = validated_data.get("permanent_address", instance.permanent_address)
-            instance.temporary_address = validated_data.get("temporary_address", instance.temporary_address)
-            instance.dob = validated_data.get("dob", instance.dob)
-            userserializer = UserSerializer(users_obj, data=user_data, partial=True)
-            if userserializer.is_valid(raise_exception=True):
-                full_name = userserializer.validated_data["full_name"].strip().split()
-                first_name, last_name = full_name[0], full_name[1:]
-                userserializer.save()
-                last_name_all = " ".join(last_name)
-                user_data_obj = User.objects.get(id=self.instance.user.id)
-                user_data_obj.first_name = first_name
-                user_data_obj.last_name = last_name_all
-                user_data_obj.save()
-            return instance
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user")
+        users_obj = self.instance.user
+        userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
+        if userSerializer.is_valid(raise_exception=True):
+            full_name = userSerializer.validated_data["full_name"].strip().split()
+            first_name, last_name = full_name[0], full_name[1:]
+            userSerializer.save()
+            last_name_all = " ".join(last_name)
+            user_data_obj = User.objects.get(id=self.instance.user.id)
+            user_data_obj.first_name = first_name
+            user_data_obj.last_name = last_name_all
+            user_data_obj.save()
+        super(StudentInfoSerializer, self).update(instance, validated_data)
+        return instance
 
 
 
