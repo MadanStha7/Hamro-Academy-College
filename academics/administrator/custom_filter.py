@@ -1,9 +1,10 @@
 import django_filters
-
-
 from academics.models import ApplyShift
 from academics.models import SubjectGroup
 from onlineclass.models import OnlineClassInfo
+
+
+from academics.models import SubjectGroup
 from timetable.models import TimeTable
 
 
@@ -37,7 +38,7 @@ class TimeTableFilter(django_filters.rest_framework.FilterSet):
         fields = ["grade", "section", "subject", "faculty"]
 
 
-class TimeTableFilter(django_filters.rest_framework.FilterSet):
+class TeacherTimeTableFilter(django_filters.rest_framework.FilterSet):
     grade = django_filters.UUIDFilter(field_name='grade__id', lookup_expr='exact')
     section = django_filters.UUIDFilter(field_name='section__id', lookup_expr='exact')
 

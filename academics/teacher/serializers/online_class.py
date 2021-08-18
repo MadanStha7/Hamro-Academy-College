@@ -5,16 +5,13 @@ from onlineclass.models import OnlineClassInfo
 
 
 class OnlineClassInfoSerializer(serializers.ModelSerializer):
-    is_completed = serializers.BooleanField(read_only=True)
-    is_upcoming = serializers.BooleanField(read_only=True)
-    is_ongoing = serializers.BooleanField(read_only=True)
     subject_name = serializers.CharField(read_only=True)
     teacher_first_name = serializers.CharField(read_only=True)
     teacher_last_name = serializers.CharField(read_only=True)
     section_name = serializers.CharField(read_only=True)
     grade_name = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
-    class_date = serializers.CharField(required=True)
+    class_date = serializers.DateField(required=True)
 
     class Meta:
         model = OnlineClassInfo
@@ -34,9 +31,6 @@ class OnlineClassInfoSerializer(serializers.ModelSerializer):
             "faculty",
             "faculty_name",
             "link_code",
-            "is_completed",
-            "is_upcoming",
-            "is_ongoing",
         ]
 
     def validate(self, value):
@@ -47,3 +41,28 @@ class OnlineClassInfoSerializer(serializers.ModelSerializer):
         value = validate_date(value)
         return value
 
+
+class TeacherStudentOnlineClassAttendanceSerializer(serializers.ModelSerializer):
+    grade_name = serializers.CharField(read_only=True)
+    section_name = serializers.CharField(read_only=True)
+    subject_name = serializers.CharField(read_only=True)
+    student_first_name = serializers.CharField(read_only=True)
+    student_last_name = serializers.CharField(read_only=True)
+    online_class = OnlineClassInfoSerializer(read_only=True)
+
+    class Meta:
+        # model = StudentOnlineClassAttendance
+        read_only_fields = ["link"]
+        fields = (
+            "id",
+            "online_class",
+            "student_academic",
+            "joined_on",
+            "created_on",
+            "modified_on",
+            "grade_name",
+            "section_name",
+            "subject_name",
+            "student_first_name",
+            "student_last_name",
+        )

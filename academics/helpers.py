@@ -1,10 +1,10 @@
 import datetime
 
+from django.db.models import Q, F
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
-from django.db.models import BooleanField, Case, Q, When, F
-from django.utils import timezone
 
+from student.models import StudentAcademicDetail
 from timetable.models import TimeTable
 
 
@@ -42,71 +42,35 @@ def validate_start_end_time(value):
             )
 
 
-def get_online_class_values(queryset):
-    time_now = timezone.now().strftime("%H:%M")
-    queryset = queryset.annotate(
-        subject_name=F("subject__name"),
-        teacher_first_name=F("created_by__first_name"),
-        teacher_last_name=F("created_by__last_name"),
-        grade_name=F("grade__name"),
-        section_name=F("section__name"),
-        is_completed=Case(
-            When(
-                Q(class_date__lt=datetime.date.today()),
-                # and Q(end_time__lt=time_now),
-                then=True,
-            ),
-            When(
-                Q(class_date=datetime.date.today()) and Q(end_time__lt=time_now),
-                then=True,
-            ),
-            output_field=BooleanField(),
-            default=False,
-        ),
-        is_upcoming=Case(
-            When(
-                Q(class_date__gte=datetime.date.today(), start_time__gt=time_now),
-                then=True,
-            ),
-            output_field=BooleanField(),
-            default=False,
-        ),
-        is_ongoing=Case(
-            When(
-                Q(class_date=datetime.date.today())
-                and Q(start_time__lte=time_now, end_time__gte=time_now),
-                then=True,
-            ),
-            output_field=BooleanField(),
-            default=False,
-        ),
+def get_student_list_online_attendance(online_class_info, general_info):
+    """
+    helper function to get the list of student of particular class and section
+    to know, whether student have joined online class or not
+    """
+    student_academics = (
+        StudentAcademicDetail.objects.filter(
+            grade=online_class_info.grade,
+            section=online_class_info.section,
+            academic_session__status=True,
+            general_info=general_info,
+        )
+        .exclude(~Q(student_online_class_attendance=None))
+        .annotate(
+            student_academic=F("id"),
+            grade_name=F("grade__name"),
+            section_name=F("section__name"),
+            student_first_name=F("student__user__first_name"),
+            student_last_name=F("student__user__last_name"),
+        )
+        .values(
+            "id",
+            "student_academic",
+            "grade_name",
+            "section_name",
+            "student_first_name",
+            "student_last_name",
+        )
     )
-    return queryset
-
-
-def online_class_helper(data, class_date, start_time, end_time):
-    today_date = datetime.datetime.utcnow()
-    today_date = today_date.strftime("%Y-%m-%d")
-
-    time_now = timezone.now().strftime("%H:%M")
-    if (class_date <= today_date) and (end_time < time_now):
-        data.update({"is_completed": True})
-    else:
-        data.update({"is_completed": False})
-
-    if (class_date == today_date) and (start_time > time_now):
-        data.update({"is_upcoming": True})
-
-    elif class_date > today_date:
-        data.update({"is_upcoming": True})
-
-    else:
-        data.update({"is_upcoming": False})
-
-    if class_date == today_date and (start_time < time_now) and (end_time > time_now):
-        data.update({"is_ongoing": True})
-    else:
-        data.update({"is_ongoing": False})
-    return data
-
-
+    for student in student_academics:
+        student.update({"joined_on": None})
+    return student_academics
