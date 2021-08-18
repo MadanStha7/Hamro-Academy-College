@@ -5,8 +5,6 @@ from academics.frontdeskofficer.viewsets.subject_group import (
 )
 
 urlpatterns = [
-    path("front-desk-officer/subjectgroup/", SubjectGroupListAPIView.as_view()),
-    path(
-        "front-desk-officer/subjectgroup/<pk>/", SubjectGroupRetrieveAPIView.as_view()
-    ),
+    path("frontdesk/subjectgroup/", SubjectGroupListAPIView.as_view()),
+    path("frontdesk/subjectgroup/<pk>/", SubjectGroupRetrieveAPIView.as_view()),
 ]
