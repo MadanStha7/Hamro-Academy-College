@@ -54,7 +54,8 @@ class Staff(CommonInfo):
     spouse_name = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
-        return str(self.id)
+
+        return "{} -- {}".format(self.user.email, self.institution)
 
     class Meta:
         db_table = "staff"
