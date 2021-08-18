@@ -41,36 +41,3 @@ def validate_start_end_time(value):
                 "start time should not be after and equal to end time"
             )
 
-
-def get_student_list_online_attendance(online_class_info, general_info):
-    """
-    helper function to get the list of student of particular class and section
-    to know, whether student have joined online class or not
-    """
-    student_academics = (
-        StudentAcademicDetail.objects.filter(
-            grade=online_class_info.grade,
-            section=online_class_info.section,
-            academic_session__status=True,
-            general_info=general_info,
-        )
-        .exclude(~Q(student_online_class_attendance=None))
-        .annotate(
-            student_academic=F("id"),
-            grade_name=F("grade__name"),
-            section_name=F("section__name"),
-            student_first_name=F("student__user__first_name"),
-            student_last_name=F("student__user__last_name"),
-        )
-        .values(
-            "id",
-            "student_academic",
-            "grade_name",
-            "section_name",
-            "student_first_name",
-            "student_last_name",
-        )
-    )
-    for student in student_academics:
-        student.update({"joined_on": None})
-    return student_academics
