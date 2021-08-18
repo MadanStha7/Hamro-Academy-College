@@ -35,8 +35,8 @@ class SubjectGroupRetrieveAPIView(RetrieveAPIView):
 
     def get_object(self):
         try:
-            return SubjectGroup.objects.get(
-                id=self.kwargs.get("pk"), institution=self.request.institution
-            )
+            return SubjectGroup.objects.annotate(
+                grade_name=F("grade__name"),
+            ).get(id=self.kwargs.get("pk"), institution=self.request.institution)
         except SubjectGroup.DoesNotExist:
             raise ValidationError({"error": ["SubjectGroup object doesn't exist!"]})
