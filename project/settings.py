@@ -54,6 +54,7 @@ SYSTEM_APPS = [
     "guardian",
     "staff",
     "timetable",
+    "onlineclass",
 ]
 
 THIRD_PARTY_APPS = [
