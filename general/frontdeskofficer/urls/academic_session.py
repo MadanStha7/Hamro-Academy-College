@@ -5,9 +5,9 @@ from general.frontdeskofficer.viewsets.academic_session import (
 )
 
 urlpatterns = [
-    path("front-desk-officer/academic-session/", AcademicSessionListAPIView.as_view()),
+    path("frontdesk/academic-session/", AcademicSessionListAPIView.as_view()),
     path(
-        "front-desk-officer/academic-session/<pk>/",
+        "frontdesk/academic-session/<pk>/",
         AcademicSessionRetrieveAPIView.as_view(),
     ),
 ]
