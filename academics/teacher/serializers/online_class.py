@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from academics.helpers import validate_start_end_time, validate_date
-from academics.models import OnlineClassInfo
+from onlineclass.models import OnlineClassInfo
 
 
 class OnlineClassInfoSerializer(serializers.ModelSerializer):
