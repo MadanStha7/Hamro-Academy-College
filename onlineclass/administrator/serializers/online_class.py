@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from onlineclass.administrator.utils.helpers import validate_date
 from onlineclass.models import (
     OnlineClassInfo,
 )
@@ -36,3 +38,8 @@ class OnlineClassSerializer(serializers.ModelSerializer):
         if data["start_time"] > data["end_time"]:
             raise serializers.ValidationError("start time must be before end time")
         return data
+
+    def validate_class_date(self, value):
+        if value:
+            value = validate_date(value)
+        return value
