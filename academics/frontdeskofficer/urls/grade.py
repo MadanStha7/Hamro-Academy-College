@@ -5,6 +5,6 @@ from academics.frontdeskofficer.viewsets.grade import (
 )
 
 urlpatterns = [
-    path("front-desk-officer/grade/", GradeListAPIView.as_view()),
-    path("front-desk-officer/grade/<pk>/", GradeRetrieveAPIView.as_view()),
+    path("frontdesk/grade/", GradeListAPIView.as_view()),
+    path("frontdesk/grade/<pk>/", GradeRetrieveAPIView.as_view()),
 ]

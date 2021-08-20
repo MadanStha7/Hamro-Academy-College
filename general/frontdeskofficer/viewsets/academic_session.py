@@ -33,9 +33,9 @@ class AcademicSessionRetrieveAPIView(RetrieveAPIView):
 
     def get_object(self):
         try:
-            academic_session = AcademicSession.objects.get(
-                id=self.kwargs.get("pk"), institution=self.request.institution
-            )
+            academic_session = AcademicSession.objects.annotate(
+                grade_name=F("grade__name"),
+            ).get(id=self.kwargs.get("pk"), institution=self.request.institution)
             # academic_session.annotate(grade_name=F("grade__name")
             return academic_session
 
