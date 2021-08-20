@@ -51,7 +51,12 @@ class ShiftAPIView(ListAPIView):
     def get_queryset(self):
         queryset = TimeTable.objects.filter(teacher=self.request.user,
                                             institution=self.request.institution).annotate(
-            shift_name=F("shift__name"))
+            shift_name=F("shift__name"),
+            section_name=F("section__name"),
+            grade_name=F("grade__name"),
+            subject_name=F("subject__name"),
+            shift_time=F("start_time")
+        )
         return queryset
 
 
