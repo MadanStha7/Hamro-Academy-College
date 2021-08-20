@@ -1,9 +1,7 @@
 from rest_framework import serializers
 
 from onlineclass.administrator.utils.helpers import validate_date
-from onlineclass.models import (
-    OnlineClassInfo,
-)
+from onlineclass.models import OnlineClassInfo
 
 
 class OnlineClassSerializer(serializers.ModelSerializer):
