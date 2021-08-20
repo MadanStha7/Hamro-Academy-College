@@ -1,11 +1,12 @@
-from rest_framework.generics import RetrieveAPIView, get_object_or_404
+from django.db.models import F
+from rest_framework.generics import RetrieveUpdateAPIView, get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from permissions.student import StudentPermission
-from student.administator.serializer.student import StudentInfoSerializer
+from student.student.serializers.profile import StudentInfoSerializer
 from student.models import StudentInfo
 
 
-class StudentProfileAPIView(RetrieveAPIView):
+class StudentProfileAPIView(RetrieveUpdateAPIView):
     """
     student profile detail api view
     """
