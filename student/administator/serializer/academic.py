@@ -11,6 +11,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
     section_name = serializers.CharField(read_only=True)
     grade_name = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
+    shift_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = StudentAcademicDetail
@@ -26,6 +27,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
             "faculty_name",
             "faculty",
             "shift",
+            "shift_name",
             "academic_session",
             "institution"
         ]
