@@ -18,10 +18,9 @@ class TeacherProfileView(RetrieveUpdateAPIView):
 
     def get_object(self):
         try:
-            staff = Staff.objects.get(user=self.kwargs.get("pk"))
+            staff = Staff.objects.get(user=self.request.user)
             staff.academic_info = StaffAcademicInfo.objects.get(staff=staff)
-            if staff.user == self.request.user:
-                return staff
+            return staff
         except Staff.DoesNotExist:
             raise PermissionDenied({"unauthorized": "you don't have enough permission"})
 
