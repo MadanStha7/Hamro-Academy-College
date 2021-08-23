@@ -4,7 +4,7 @@ from common.administrator.viewset import CommonInfoViewSet
 from student.administator.custom_fiter import PreviousAcademicFilter
 from student.administator.serializer.previous_academic import PreviousAcademicSerializer
 
-from student.models import  PreviousAcademicDetail
+from student.models import PreviousAcademicDetail
 
 
 class PreviousAcademicViewSet(CommonInfoViewSet):
