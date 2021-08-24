@@ -4,31 +4,33 @@ from academics.administrator.custom_filter import TimeTableFilter
 from academics.teacher.serializers.timetable import TeacherTimeTableSerializer
 from timetable.models import TimeTable
 from django_filters import rest_framework as filters
+from collections import defaultdict
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from permissions.teacher import TeacherPermission
 
 
 class TeacherTimeTableAPIView(ListAPIView):
-    """
-    api view where teacher can view the timetable
-    """
+    """Api to display a timetable list in teacher"""
 
-    serializer_class = TeacherTimeTableSerializer
     queryset = TimeTable.objects.none()
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_class = TimeTableFilter
+    serializer_class = TeacherTimeTableSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["faculty", "grade", "shift", "section"]
+    permission_classes = (IsAuthenticated, TeacherPermission)
 
-    def get_queryset(self):
-        queryset = (
-            TimeTable.objects.filter(
-                teacher=self.request.user,
-                academic_session__status=True,
-            )
-            .annotate(
-                section_name=F("section__name"),
-                grade_name=F("grade__name"),
-                subject_name=F("subject__name"),
-                shift_name=F("shift__name"),
-                faculty_name=F("faculty__name"),
-            )
-            .order_by("start_time")
-        )
-        return queryset
+    def list(self, request):
+        """api to get list of timetable"""
+        queryset = TimeTable.objects.filter(institution=self.request.institution)
+        queryset = queryset.annotate(
+            subject__name=F("subject__name"),
+            teacher__firstname=F("teacher__first_name"),
+            teacher__lastname=F("teacher__last_name"),
+        ).order_by("start_time")
+        queryset = self.filter_queryset(queryset)
+        serializer = TeacherTimeTableSerializer(queryset, many=True)
+        timetables = defaultdict(list)
+        for data in serializer.data:
+            timetables[data["day_name"]].append(data)
+        return Response(timetables)
