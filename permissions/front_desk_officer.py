@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 from common.models import SystemRole
 
 
-class FrontDeskOfficerPermission(BasePermission):
+class FrontDeskPermission(BasePermission):
     """
     permission to check if authenticated user is Teacher or not
     """

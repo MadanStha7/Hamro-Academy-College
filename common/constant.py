@@ -99,13 +99,10 @@ DAYS_CHOICES = (
     (7, "SUN"),
 )
 
-MARITAL_STATUS = (
-    ("M", "Male"),
-    ("F", "F"),
-    ("O", "Others"),
+
+SELECT_MARK_TYPE = (
+    ("G", "GPA"),
+    ("P", "PERCENTAGE"),
 )
 
-DISCOUNT_FINE_OPTIONS = (
-    ("P", "Percentage"),
-    ("A", "Amount")
-)
+DISCOUNT_FINE_OPTIONS = (("P", "Percentage"), ("A", "Amount"))

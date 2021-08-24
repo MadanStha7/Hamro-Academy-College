@@ -6,7 +6,12 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from common.constant import GRADE_CHOICES, SUBJECT_TYPES
+from common.constant import (
+    GRADE_CHOICES,
+    SUBJECT_TYPES,
+    SELECT_GENDER,
+    SELECT_MARK_TYPE,
+)
 from general.models import AcademicSession
 
 
@@ -160,3 +165,31 @@ def validate_unique_email(model, email, institution, instance):
             )
 
     return email
+
+
+def return_gender_value(name):
+    for gender in SELECT_GENDER:
+        if gender[0] == name:
+            return gender[1]
+    return None
+
+
+def return_marks_types_value(name):
+    for marks_types in SELECT_MARK_TYPE:
+        if marks_types[0] == name:
+            return marks_types[1]
+    return None
+
+
+def validate_unique_mobile_number(model, phone, institution, instance):
+    if instance:
+
+        if model.objects.filter(
+            ~Q(id=instance.user.id), contact_number=phone, institution=institution
+        ).exists():
+            raise serializers.ValidationError("phone number already exists")
+    else:
+        if model.objects.filter(contact_number=phone, institution=institution).exists():
+            raise serializers.ValidationError("phone number already exists")
+
+    return phone
