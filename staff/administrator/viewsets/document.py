@@ -22,7 +22,7 @@ class DocumentViewSet(CommonInfoViewSet):
         staff = self.request.query_params.get("staff")
         if self.request.institution:
             serializer.save(
-                staff=Staff(id=staff),
+                staff=Staff.objects.get(id=staff),
                 created_by=self.request.user,
                 institution=self.request.institution,
             )
