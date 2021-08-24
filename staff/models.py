@@ -6,7 +6,7 @@ from common.constant import (
     SELECT_GENDER,
     SELECT_BLOOD_GROUP,
     CONTRACT_TYPE,
-    MARITAL_STATUS,
+    SELECT_MARITAL_STATUS,
 )
 from academics.models import Faculty, Shift
 
@@ -50,7 +50,7 @@ class Staff(CommonInfo):
     )
     address = models.TextField()
     dob = models.DateField()
-    marital_status = models.CharField(max_length=1, choices=MARITAL_STATUS)
+    marital_status = models.CharField(max_length=1, choices=SELECT_MARITAL_STATUS)
     spouse_name = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
