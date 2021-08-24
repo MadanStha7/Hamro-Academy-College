@@ -40,7 +40,5 @@ urlpatterns = [
     path("api/v1/", include("timetable.urls")),
     path("api/v1/", include("fees.urls")),
     path("api/v1/", include("inquiry.urls")),
-
-
     # path("api/v1/", include("onlineclass.urls")),
 ]
