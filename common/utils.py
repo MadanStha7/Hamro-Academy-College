@@ -29,13 +29,15 @@ def validate_unique_name(model, value, institution, instance):
         if model.objects.filter(
             ~Q(id=instance.id), name=value.title(), institution=institution
         ).exists():
-            raise serializers.ValidationError(
-                f"{model.__name__} with this name already exists"
+            raise ValidationError({
+                "message": [f"{model.__name__} with this name already exists"]
+            }
+
             )
     else:
         if model.objects.filter(name=value.title(), institution=institution).exists():
-            raise serializers.ValidationError(
-                f"{model.__name__} with this name already exists"
+            raise ValidationError(
+                {"message": [f"{model.__name__} with this name already exists"]}
             )
 
     return value
