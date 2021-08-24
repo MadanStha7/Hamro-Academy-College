@@ -25,7 +25,8 @@ class StudentAcademicViewSet(CommonInfoViewSet):
         ).annotate(
             section_name=F("section__name"),
             grade_name=F("grade__name"),
-            faculty_name=F("faculty__name")
+            faculty_name=F("faculty__name"),
+            shift_name=F("shift__name"),
         )
         return queryset
 

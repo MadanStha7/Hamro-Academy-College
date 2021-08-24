@@ -33,7 +33,8 @@ class StudentInfoViewSet(CommonInfoViewSet):
     def get_queryset(self):
         queryset = StudentInfo.objects.filter(
             institution=self.request.institution
-        )
+        ).annotate(student_first_name=F("user__first_name"),
+                   student_last_name=F("user__last_name"),)
         return queryset
 
     def list(self, request, *args, **kwargs):

@@ -11,6 +11,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
     section_name = serializers.CharField(read_only=True)
     grade_name = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
+    shift_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = StudentAcademicDetail
@@ -26,6 +27,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
             "faculty_name",
             "faculty",
             "shift",
+            "shift_name",
             "academic_session",
             "institution"
         ]
@@ -41,9 +43,10 @@ class StudentAcademicDetailSerializer(serializers.Serializer):
         with transaction.atomic():
             previous_details = validated_data.pop("previous_academic")
             student_academics = validated_data.pop("student_academic")
-            previous_academic = PreviousAcademicDetail.objects.create(
-                **previous_details
-            )
+            if not PreviousAcademicDetail.objects.filter(student=student_academics.get("student")):
+                previous_academic = PreviousAcademicDetail.objects.create(
+                    **previous_details
+                )
             if not StudentAcademicDetail.objects.filter(student=student_academics.get("student"),
                                                         academic_session__status=True):
                 student_academic = StudentAcademicDetail.objects.create(**student_academics)

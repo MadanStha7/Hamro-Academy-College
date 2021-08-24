@@ -1,6 +1,6 @@
 from django.db.models import F
 from rest_framework.generics import ListAPIView
-from academics.administrator.custom_filter import TimeTableFilter
+from academics.administrator.custom_filter import TeacherTimeTableFilter
 from academics.teacher.serializers.timetable import TeacherTimeTableSerializer
 from timetable.models import TimeTable
 from django_filters import rest_framework as filters

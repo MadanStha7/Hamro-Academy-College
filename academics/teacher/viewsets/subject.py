@@ -37,8 +37,9 @@ class TeacherSubjectView(ListAPIView):
             teacher_first_name=F("teacher__first_name"),
             teacher_last_name=F("teacher__last_name"),
             subject_name=F("subject__name"),
-            subject_credit_hour=F("subject__credit_hour"),
+            credit_hour=F("subject__credit_hour"),
             subject_type=F("subject__subject_type"),
+            is_optional=F("subject__is_optional"),
         )
         if grade:
             validate_teacher_grade(Grade(id=grade), self.request.user)

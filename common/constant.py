@@ -104,3 +104,8 @@ MARITAL_STATUS = (
     ("F", "F"),
     ("O", "Others"),
 )
+
+DISCOUNT_FINE_OPTIONS = (
+    ("P", "Percentage"),
+    ("A", "Amount")
+)
