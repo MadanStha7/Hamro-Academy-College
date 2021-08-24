@@ -105,7 +105,4 @@ SELECT_MARK_TYPE = (
     ("P", "PERCENTAGE"),
 )
 
-DISCOUNT_FINE_OPTIONS = (
-    ("P", "Percentage"),
-    ("A", "Amount")
-)
+DISCOUNT_FINE_OPTIONS = (("P", "Percentage"), ("A", "Amount"))
