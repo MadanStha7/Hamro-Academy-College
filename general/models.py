@@ -27,8 +27,6 @@ class AcademicSession(CommonInfo):
     def __str__(self):
         return self.name
 
-
-
     def save(self, *args, **kwargs):
         self.name = self.name.title()
         return super(AcademicSession, self).save(*args, **kwargs)
