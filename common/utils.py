@@ -185,7 +185,7 @@ def validate_unique_mobile_number(model, phone, institution, instance):
     if instance:
 
         if model.objects.filter(
-            ~Q(id=instance.user.id), contact_number=phone, institution=institution
+            ~Q(id=instance.id), contact_number=phone, institution=institution
         ).exists():
             raise serializers.ValidationError("phone number already exists")
     else:
@@ -193,3 +193,20 @@ def validate_unique_mobile_number(model, phone, institution, instance):
             raise serializers.ValidationError("phone number already exists")
 
     return phone
+
+
+def validate_Inquery_unique_email(model, email, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.id), email=email, institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+    else:
+        if model.objects.filter(email=email, institution=institution).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+
+    return email
