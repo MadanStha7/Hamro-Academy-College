@@ -6,7 +6,7 @@ from common.utils import (
     return_gender_value,
     return_marks_types_value,
     validate_unique_mobile_number,
-    validate_unique_email,
+    validate_Inquery_unique_email,
 )
 
 
@@ -50,7 +50,7 @@ class InquirySerializer(serializers.ModelSerializer):
 
     def validate_email(self, email):
         """check that email is already exist"""
-        name = validate_unique_email(
+        name = validate_Inquery_unique_email(
             Inquiry, email, self.context.get("institution"), self.instance
         )
         return name
