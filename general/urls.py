@@ -1,5 +1,5 @@
 from general.administrator.urls.core import urlpatterns as academic_session_urls
-from general.frontdeskofficer.urls.core import urlpatterns as frontdeskofficer_urls
+from general.frontdesk.urls.core import urlpatterns as frontdesk_urls
 
 
-urlpatterns = academic_session_urls + frontdeskofficer_urls
+urlpatterns = academic_session_urls + frontdesk_urls
