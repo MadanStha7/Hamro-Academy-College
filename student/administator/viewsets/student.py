@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.response import Response
 
 from common.administrator.viewset import CommonInfoViewSet
-from common.utils import active_academic_session
 from student.administator.custom_fiter import StudentFilter
 from student.administator.serializer.student import (
     StudentInfoSerializer,
@@ -34,6 +33,7 @@ class StudentInfoViewSet(CommonInfoViewSet):
         queryset = StudentInfo.objects.filter(
             institution=self.request.institution
         ).annotate(student_first_name=F("user__first_name"),
+                   student_middle_name=F("user__middle_name"),
                    student_last_name=F("user__last_name"),)
         return queryset
 
@@ -48,6 +48,7 @@ class StudentInfoViewSet(CommonInfoViewSet):
         result = result.annotate(
             phone=F("user__phone"),
             student_first_name=F("user__first_name"),
+            student_middle_name=F("user__middle_name"),
             student_last_name=F("user__last_name"),
             faculty=F("student_academic_detail__faculty__name"),
             section=F("student_academic_detail__section__name"),
