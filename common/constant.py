@@ -105,4 +105,9 @@ SELECT_MARK_TYPE = (
     ("P", "PERCENTAGE"),
 )
 
+SELECT_STATUS = (
+    ("A", "Admitted"),
+    ("D", "Draft")
+)
+
 DISCOUNT_FINE_OPTIONS = (("P", "Percentage"), ("A", "Amount"))
