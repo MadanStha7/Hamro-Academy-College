@@ -14,18 +14,26 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     phone = serializers.CharField()
     full_name = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
     email = serializers.EmailField()
 
     class Meta:
         model = User
-        read_only_fields = ["first_name", "last_name"]
-        fields = ("id", "phone", "full_name", "email")
+        fields = ("id", "phone", "full_name", "email", "first_name", "last_name")
 
 
 class StaffSerializer(serializers.ModelSerializer):
     photo = serializers.CharField()
     designation__name = serializers.CharField(read_only=True)
     user = UserSerializer()
+
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        res["roles"] = RoleSerializer(
+            instance.user.roles.all().values("id", "title"), many=True
+        ).data
+        return res
 
     class Meta:
         model = Staff
@@ -117,9 +125,6 @@ class StaffListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
-        res["roles"] = RoleSerializer(
-            instance.user.roles.all().values("id", "title"), many=True
-        ).data
         res["user"] = UserSerializer(instance.user).data
         return res
 
