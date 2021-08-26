@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from staff.models import Staff
+from user.administrator.serializers.role import RoleSerializer
 from common.utils import validate_unique_phone, validate_unique_email
 from academics.models import Faculty, Grade
 from common.utils import to_internal_value
@@ -114,6 +115,14 @@ class StaffListSerializer(serializers.ModelSerializer):
         source="get_blood_group_display", read_only=True
     )
 
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        res["roles"] = RoleSerializer(
+            instance.user.roles.all().values("id", "title"), many=True
+        ).data
+        res["user"] = UserSerializer(instance.user).data
+        return res
+
     class Meta:
         model = Staff
         read_only_fields = ["institution", "created_by"]
@@ -129,6 +138,7 @@ class StaffListSerializer(serializers.ModelSerializer):
             "staff_email",
             "staff_first_name",
             "staff_last_name",
+            "user",
         ]
 
 
