@@ -8,6 +8,7 @@ from common.constant import (
     SELECT_GENDER,
     SELECT_BLOOD_GROUP,
     SELECT_RELIGION,
+    SELECT_STATUS
 )
 from general.models import AcademicSession
 from guardian.models import StudentGuardianInfo
@@ -55,9 +56,10 @@ class StudentInfo(CommonInfo):
     gender = models.CharField(max_length=1, choices=SELECT_GENDER)
     photo = models.ImageField(upload_to="student-photos/")
     disable = models.BooleanField(default=False, db_index=True)
+    status = models.CharField(max_length=1, choices= SELECT_STATUS)
 
     def __str__(self):
-        return  f"{self.user.get_full_name()}"
+        return f"{self.user.get_full_name()}"
 
     class Meta:
         ordering = ["-created_on"]
@@ -82,8 +84,8 @@ class PreviousAcademicDetail(CommonInfo):
     student = models.ForeignKey(
         StudentInfo, related_name="previous_academic_detail", on_delete=models.CASCADE
     )
-    last_school = models.CharField(max_length=50)
-    address = models.TextField()
+    last_school = models.CharField(max_length=50, null=True, blank=True)
+    address = models.TextField(null=True, blank=True)
     phone = models.CharField(max_length=15, db_index=True, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
 
