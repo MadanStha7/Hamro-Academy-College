@@ -79,6 +79,7 @@ class SystemUser(AbstractUser):
         blank=True,
     )
     phone = models.CharField(max_length=15, unique=True)
+    middle_name = models.CharField(_('middle name'), max_length=150, blank=True)
     username = None
     roles = models.ManyToManyField(
         Role,
