@@ -11,6 +11,7 @@ from common.constant import (
     SUBJECT_TYPES,
     SELECT_GENDER,
     SELECT_MARK_TYPE,
+    SELECT_MARITAL_STATUS,
 )
 from general.models import AcademicSession
 
@@ -34,10 +35,8 @@ def validate_unique_name(model, value, institution, instance):
         if model.objects.filter(
             ~Q(id=instance.id), name=value.title(), institution=institution
         ).exists():
-            raise ValidationError({
-                "message": [f"{model.__name__} with this name already exists"]
-            }
-
+            raise ValidationError(
+                {"message": [f"{model.__name__} with this name already exists"]}
             )
     else:
         if model.objects.filter(name=value.title(), institution=institution).exists():
@@ -180,6 +179,13 @@ def return_marks_types_value(name):
     for marks_types in SELECT_MARK_TYPE:
         if marks_types[0] == name:
             return marks_types[1]
+    return None
+
+
+def return_marital_status_value(name):
+    for marital_status in SELECT_MARITAL_STATUS:
+        if marital_status[0] == name:
+            return marital_status[1]
     return None
 
 
