@@ -8,7 +8,6 @@ from common.constant import SYSTEM_DEFAULT_PASSWORD
 from common.utils import validate_unique_phone, to_internal_value
 from student.models import StudentInfo
 
-
 User = get_user_model()
 
 
@@ -125,22 +124,26 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            # created_by = validated_data.pop("created_by")
-            # if created_by.roles == "Administrator":
-            #     student.status = "A"
-            # elif created_by.roles == "Front Desk Officer":
-            #     student.status = "D"
-            # else:
-            #     pass
             user = User.objects.create(
-                phone=user.get("phone"),
-                first_name=user.get("first_name"),
-                middle_name=user.get("middle_name"),
-                last_name=user.get("last_name"),
-                email=user.get("email"),
-                institution=self.context.get("institution"),
-            )
-            student = StudentInfo.objects.create(user=user, **validated_data)
+                                       phone=user.get("phone"),
+                                       first_name=user.get("first_name"),
+                                       middle_name=user.get("middle_name"),
+                                       last_name=user.get("last_name"),
+                                       email=user.get("email"),
+                                       institution=self.context.get("institution"),
+                                       )
+            student = StudentInfo(user=user, **validated_data)
+
+            created_by = validated_data.get("created_by")
+            for item in created_by.roles.all():
+                if item.title == "Administrator":
+                    student.status = "A"
+
+                elif item.title == "Front Desk Officer":
+                    item.title = "D"
+                else:
+                    pass
+            student.save()
             student.user.username = student.admission_number
             user.set_password(SYSTEM_DEFAULT_PASSWORD)
             student.user.save()
@@ -167,11 +170,3 @@ class StudentInfoSerializer(serializers.ModelSerializer):
 
         super(StudentInfoSerializer, self).update(instance, validated_data)
         return instance
-
-
-
-
-
-
-
-
