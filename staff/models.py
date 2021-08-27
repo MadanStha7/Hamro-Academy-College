@@ -32,6 +32,31 @@ class Designation(CommonInfo):
         db_table = "designation"
 
 
+class Department(CommonInfo):
+    """
+    model to store the department of staff
+    """
+
+    name = models.CharField(max_length=64)
+    faculty = models.ForeignKey(
+        Faculty, related_name="department", on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.title()
+        return super(Department, self).save(*args, **kwargs)
+
+    class Meta:
+        ordering = ["-created_on"]
+        db_table = "Department"
+
+
+# deparmtent model:name,faculty(attrs)
+
+
 class Staff(CommonInfo):
     """
     model to store the staff detail
@@ -70,18 +95,12 @@ class StaffAcademicInfo(CommonInfo):
     staff = models.OneToOneField(
         Staff, related_name="staff_academic_info", on_delete=models.CASCADE
     )
-    shift = models.ManyToManyField(Shift, related_name="staff_academic_info_faculty")
-    faculty = models.ManyToManyField(Faculty, related_name="staff_academic_info_shift")
-    highest_degree = models.CharField(max_length=50, null=True, blank=True)
-    experience = models.FloatField(default=0, null=True, blank=True)
-    working_days = models.IntegerField(null=True, blank=True)
-    leave = models.FloatField(
-        default=0, help_text="Staff's leave days", null=True, blank=True
+    department = models.ManyToManyField(Department, related_name="staff_academic_info")
+    designation = models.ForeignKey(
+        Designation, related_name="staff_academic_info", on_delete=models.CASCADE
     )
     previous_academic_details = models.BooleanField(default=False)
     previous_college_name = models.CharField(max_length=40, null=True, blank=True)
-    previous_college_email = models.EmailField(max_length=40, null=True, blank=True)
-    previous_college_contact = models.CharField(max_length=40, null=True, blank=True)
     full_address = models.TextField(null=True, blank=True)
 
     def __str__(self):
