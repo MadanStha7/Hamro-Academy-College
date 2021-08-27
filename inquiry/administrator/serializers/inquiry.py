@@ -15,8 +15,8 @@ class InquiryListSerializer(serializers.ModelSerializer):
 
     def to_representation(self, data):
         data = super(InquiryListSerializer, self).to_representation(data)
-        data["gender"] = return_gender_value(data["gender"])
-        data["marks_type"] = return_marks_types_value(data["marks_type"])
+        data["gender_name"] = return_gender_value(data["gender"])
+        data["marks_type_name"] = return_marks_types_value(data["marks_type"])
         return data
 
     class Meta:
