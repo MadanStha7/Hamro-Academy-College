@@ -1,7 +1,11 @@
 from rest_framework import serializers
 from staff.models import Staff
 from user.administrator.serializers.role import RoleSerializer
-from common.utils import validate_unique_phone, validate_unique_email
+from common.utils import (
+    validate_unique_phone,
+    validate_unique_email,
+    return_marital_status_value,
+)
 from academics.models import Faculty, Grade
 from common.utils import to_internal_value
 from django.db import transaction
@@ -33,6 +37,7 @@ class StaffSerializer(serializers.ModelSerializer):
         res["roles"] = RoleSerializer(
             instance.user.roles.all().values("id", "title"), many=True
         ).data
+        res["marital_status_value"] = return_marital_status_value(res["marital_status"])
         return res
 
     class Meta:
@@ -48,6 +53,7 @@ class StaffSerializer(serializers.ModelSerializer):
             "marital_status",
             "spouse_name",
             "designation__name",
+            "marital_status",
         ]
 
     def validate(self, attrs):
@@ -126,6 +132,7 @@ class StaffListSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         res = super().to_representation(instance)
         res["user"] = UserSerializer(instance.user).data
+        res["marital_status_value"] = return_marital_status_value(res["marital_status"])
         return res
 
     class Meta:
@@ -144,6 +151,7 @@ class StaffListSerializer(serializers.ModelSerializer):
             "staff_first_name",
             "staff_last_name",
             "user",
+            "marital_status",
         ]
 
 
