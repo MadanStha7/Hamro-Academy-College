@@ -50,7 +50,8 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
             "guardian_last_name",
             "relation",
             "phone",
-            "email"
+            "email",
+            "status"
         ]
 
 
@@ -140,7 +141,7 @@ class StudentInfoSerializer(serializers.ModelSerializer):
                     student.status = "A"
 
                 elif item.title == "Front Desk Officer":
-                    item.title = "D"
+                    student.status = "D"
                 else:
                     pass
             student.save()
