@@ -1,11 +1,17 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import F
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from common.administrator.viewset import CommonInfoViewSet
+from permissions.administrator import AdministratorPermission
+from permissions.administrator_or_front_desk import AdministratorOrFrontDeskOPermission
+from permissions.front_desk_officer import FrontDeskPermission
 from student.administator.custom_fiter import StudentFilter
 from student.administator.serializer.student import (
     StudentInfoSerializer,
@@ -24,6 +30,7 @@ class StudentInfoViewSet(CommonInfoViewSet):
 
     queryset = StudentInfo.objects.none()
     serializer_class = StudentInfoSerializer
+    permission_classes = (IsAuthenticated, AdministratorOrFrontDeskOPermission)
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["user__first_name", "user__last_name", "guardian_detail__user__first_name",
                      "guardian_detail__user__last_name"]
@@ -83,3 +90,5 @@ class StudentInfoViewSet(CommonInfoViewSet):
             {"message": f"object {obj} successfully deleted"},
             status=status.HTTP_204_NO_CONTENT,
         )
+
+
