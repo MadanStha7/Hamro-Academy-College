@@ -34,3 +34,22 @@ class ClassSerializer(serializers.ModelSerializer):
             Class, attrs, self.context.get("institution"), self.instance
         )
         return attrs
+
+
+class GradeListSerializer(serializers.ModelSerializer):
+    grade_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = Class
+        read_only_fields = ["created_by", "institution"]
+        fields = [
+            "id",
+            "grade",
+            "grade_name",
+            "created_by",
+            "institution",
+        ]
+
+
+
+
