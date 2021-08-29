@@ -9,7 +9,7 @@ from academics.administrator.serializers.section import SectionSerializer
 from common.administrator.viewset import CommonInfoViewSet
 from rest_framework import filters
 
-from student.administator.custom_fiter import  SectionFilter
+from student.administator.custom_fiter import SectionFilter
 
 
 class SectionViewSet(CommonInfoViewSet):
