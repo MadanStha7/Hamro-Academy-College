@@ -1,5 +1,5 @@
 import django_filters
-from academics.models import ApplyShift
+from academics.models import ApplyShift, Class
 from academics.models import SubjectGroup
 from onlineclass.models import OnlineClassInfo
 
@@ -55,3 +55,10 @@ class OnlineClassFilter(django_filters.rest_framework.FilterSet):
         model = OnlineClassInfo
         fields = ["grade", "section"]
 
+
+class ClassFilter(django_filters.rest_framework.FilterSet):
+    faculty = django_filters.UUIDFilter(field_name='faculty_id', lookup_expr='exact')
+
+    class Meta:
+        model = Class
+        fields = ["faculty"]
