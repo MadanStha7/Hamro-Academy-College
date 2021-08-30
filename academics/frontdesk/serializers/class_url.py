@@ -28,3 +28,10 @@ class ClassSerializer(serializers.ModelSerializer):
             instance.section.all().values("id", "name"), many=True
         ).data
         return res
+
+
+class OnlineclassFilterSerializer(serializers.Serializer):
+    section__name = serializers.CharField(read_only=True)
+    section__id = serializers.CharField(read_only=True)
+    grade__name = serializers.CharField(read_only=True)
+    grade__id = serializers.CharField(read_only=True)
