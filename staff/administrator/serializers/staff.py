@@ -16,11 +16,11 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    phone = serializers.CharField()
+
     full_name = serializers.CharField(write_only=True)
     first_name = serializers.CharField(read_only=True)
     last_name = serializers.CharField(read_only=True)
-    email = serializers.EmailField()
+
 
     class Meta:
         model = User
