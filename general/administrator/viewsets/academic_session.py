@@ -6,6 +6,9 @@ from rest_framework.decorators import action
 from rest_framework import status, filters
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from django.db.models import F
+from general.administrator.custom.filter import AcademicSessionFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class AcademicSessionViewSet(CommonInfoViewSet):
@@ -15,11 +18,15 @@ class AcademicSessionViewSet(CommonInfoViewSet):
 
     serializer_class = AcademicSessionSerializer
     queryset = AcademicSession.objects.none()
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ["name"]
+    filter_class = AcademicSessionFilter
 
     def get_queryset(self):
         queryset = AcademicSession.objects.filter(institution=self.request.institution)
+        queryset = queryset.annotate(
+            faculty_name=F("faculty__name"),
+        )
         return queryset
 
     @action(detail=False, methods=["POST", "PUT"])
