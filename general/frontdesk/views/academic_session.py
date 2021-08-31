@@ -7,6 +7,9 @@ from general.frontdesk.serializers.academic_session import (
 from permissions.front_desk_officer import FrontDeskPermission
 from rest_framework.serializers import ValidationError
 from general.models import AcademicSession
+from general.administrator.custom.filter import AcademicSessionFilter
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class AcademicSessionListAPIView(ListAPIView):
@@ -14,7 +17,9 @@ class AcademicSessionListAPIView(ListAPIView):
 
     serializer_class = AcademicSessionSerializer
     queryset = AcademicSession.objects.none()
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     permission_classes = (IsAuthenticated, FrontDeskPermission)
+    filter_class = AcademicSessionFilter
 
     def get_queryset(self):
         queryset = AcademicSession.objects.filter(institution=self.request.institution)
