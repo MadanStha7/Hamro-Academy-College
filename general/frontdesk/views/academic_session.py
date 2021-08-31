@@ -20,6 +20,7 @@ class AcademicSessionListAPIView(ListAPIView):
         queryset = AcademicSession.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(
             grade_name=F("grade__name"),
+            faculty_name=F("faculty__name"),
         )
         return queryset
 
