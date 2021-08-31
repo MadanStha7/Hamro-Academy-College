@@ -16,7 +16,6 @@ class StudentTeacherView(ListAPIView):
 
     permission_classes = (IsAuthenticated, StudentPermission)
     serializer_class = StudentTeacherSerializer
-    queryset = TimeTable.objects.none()
 
     def get_queryset(self):
         student_academic_id = student_active_academic_info(self.request.user)
@@ -25,14 +24,15 @@ class StudentTeacherView(ListAPIView):
                 grade=student_academic_id.grade,
                 faculty=student_academic_id.faculty,
             )
-            .order_by("teacher")
-            .distinct("teacher")
+                .order_by("teacher")
+                .distinct("teacher")
         )
         queryset = queryset.annotate(
             teacher_full_name=Concat(
                 F("teacher__first_name"),
                 Value(" "),
                 F("teacher__last_name"),
-            )
+            ),
+            subject_name=F("subject__name"),
         )
         return queryset

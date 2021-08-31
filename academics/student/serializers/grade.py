@@ -2,7 +2,7 @@ from rest_framework import serializers
 from timetable.models import TimeTable
 
 
-class StudentGradeSerializer(serializers.ModelSerializer):
+class StudentGradeTimetableSerializer(serializers.ModelSerializer):
     grade_name = serializers.CharField(read_only=True)
     section_name = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
