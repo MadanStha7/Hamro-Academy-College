@@ -7,6 +7,7 @@ from academics.models import Grade
 
 class AcademicSessionSerializer(serializers.ModelSerializer):
     grade_name = serializers.CharField(read_only=True)
+    faculty_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = AcademicSession
@@ -21,4 +22,5 @@ class AcademicSessionSerializer(serializers.ModelSerializer):
             "institution",
             # "grade",
             "grade_name",
+            "faculty_name",
         ]

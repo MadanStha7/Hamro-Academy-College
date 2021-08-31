@@ -1,4 +1,4 @@
 from django.urls import path
-from student.student.viewsets.subject import StudentSubjectView
+from academics.student.views.subject import StudentSubjectView
 
 urlpatterns = [path("subject/", StudentSubjectView.as_view())]

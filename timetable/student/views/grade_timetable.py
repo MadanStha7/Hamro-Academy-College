@@ -4,17 +4,19 @@ from rest_framework.permissions import IsAuthenticated
 
 from student.student.utils.student_active_academic import student_active_academic_info
 from permissions.student import StudentPermission
-from student.student.serializers.grade import StudentGradeSerializer
+from timetable.student.serializers.grade_timetable import (
+    StudentGradeTimetableSerializer,
+)
 from timetable.models import TimeTable
 
 
-class StudentGradeView(ListAPIView):
+class StudentGradeTimetableView(ListAPIView):
     """
     student viewset, where student can view all timetable of his grade
     """
 
     permission_classes = (IsAuthenticated, StudentPermission)
-    serializer_class = StudentGradeSerializer
+    serializer_class = StudentGradeTimetableSerializer
     queryset = TimeTable.objects.none()
 
     def get_queryset(self):

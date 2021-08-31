@@ -2,10 +2,12 @@ from rest_framework import serializers
 from general.models import AcademicSession
 from common.utils import validate_unique_name
 from common.utils import return_grade_name_of_value
-from academics.models import Grade
+from academics.models import Faculty, Grade
 
 
 class AcademicSessionSerializer(serializers.ModelSerializer):
+    faculty_name = serializers.CharField(read_only=True)
+
     class Meta:
         model = AcademicSession
         read_only_fields = ["institution", "created_by"]
@@ -18,6 +20,8 @@ class AcademicSessionSerializer(serializers.ModelSerializer):
             "created_by",
             "institution",
             "grade",
+            "faculty",
+            "faculty_name"
             # "grade_name",
         ]
 

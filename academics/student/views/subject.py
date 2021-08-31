@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from student.student.utils.student_active_academic import student_active_academic_info
 from permissions.student import StudentPermission
-from student.student.serializers.subject import StudentSubjectSerializer
+from academics.student.serializers.subject import StudentSubjectSerializer
 from timetable.models import TimeTable
 
 
