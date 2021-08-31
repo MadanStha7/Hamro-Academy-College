@@ -31,7 +31,6 @@ class StudentGuardianInfo(CommonInfo):
     user = models.ForeignKey(
         User, related_name="student_guardian_info", on_delete=models.CASCADE
     )
-    phone = models.CharField(max_length=15, unique=True, db_index=True)
     occupation = models.CharField(max_length=50, blank=True, null=True)
     address = models.TextField()
     photo = models.ImageField(
