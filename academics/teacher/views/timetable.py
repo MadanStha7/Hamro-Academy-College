@@ -1,14 +1,12 @@
 from django.db.models import F
 from rest_framework.generics import ListAPIView
-from academics.administrator.custom_filter import TeacherTimeTableFilter
 from academics.teacher.serializers.timetable import TeacherTimeTableSerializer
-from timetable.models import TimeTable
-from django_filters import rest_framework as filters
 from collections import defaultdict
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from permissions.teacher import TeacherPermission
+from timetable.models import TimeTable
 
 
 class TeacherTimeTableAPIView(ListAPIView):

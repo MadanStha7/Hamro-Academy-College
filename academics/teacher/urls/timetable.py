@@ -1,5 +1,7 @@
-from django.urls import path
+from django.urls import path, include
 
-from academics.teacher.viewsets.timetable import TeacherTimeTableAPIView
+from academics.teacher.views.timetable import TeacherTimeTableAPIView
 
-urlpatterns = [path("teacher/timetable/", TeacherTimeTableAPIView.as_view())]
+teacher_urlpatterns = [path("timetable/", TeacherTimeTableAPIView.as_view())]
+
+urlpatterns = [path("teacher/", include(teacher_urlpatterns))]

@@ -1,19 +1,14 @@
 from django.db.models import F, Value
 from rest_framework import status
 from django_filters import rest_framework as filters
-from rest_framework.generics import  ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from academics.administrator.custom_filter import OnlineClassFilter
-from academics.teacher.serializers.online_class import OnlineClassInfoSerializer, \
-    TeacherStudentOnlineClassAttendanceSerializer
-
+from academics.teacher.serializers.online_class import OnlineClassInfoSerializer
 from common.administrator.viewset import CommonInfoViewSet
 from common.utils import active_academic_session
-from onlineclass.models import OnlineClassInfo, StudentOnlineClassAttendance
+from onlineclass.models import OnlineClassInfo
 from permissions.teacher import TeacherPermission
-from student.helpers import get_online_class_attendance
 
 
 class OnlineClassInfoViewSet(CommonInfoViewSet):
@@ -54,20 +49,6 @@ class OnlineClassInfoViewSet(CommonInfoViewSet):
             institution=self.request.institution,
             academic_session=active_session,
         )
-
-
-class TeacherStudentOnlineClassAttendanceView(ListAPIView):
-    """
-    teacher viewset, where teacher can view all the student online attendance.
-    """
-
-    permission_classes = (IsAuthenticated, TeacherPermission)
-    serializer_class = TeacherStudentOnlineClassAttendanceSerializer
-    queryset = StudentOnlineClassAttendance.objects.none()
-
-    def get_queryset(self):
-        online_class_attendance = get_online_class_attendance(self)
-        return online_class_attendance
 
 
 
