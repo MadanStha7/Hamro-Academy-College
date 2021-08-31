@@ -1,6 +1,6 @@
 from django.db import models
 from common.models import CommonInfo
-from academics.models import Grade
+from academics.models import Faculty, Grade
 
 # Create your models here.
 
@@ -14,6 +14,9 @@ class AcademicSession(CommonInfo):
         Grade,
         on_delete=models.CASCADE,
         related_name="academic_session",
+    )
+    faculty = models.ForeignKey(
+        Faculty, on_delete=models.CASCADE, related_name="academic_session", null=True
     )
     name = models.CharField(max_length=60)
     from_date = models.DateField()
