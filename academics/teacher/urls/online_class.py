@@ -1,7 +1,8 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from academics.teacher.viewsets.online_class import OnlineClassInfoViewSet, TeacherStudentOnlineClassAttendanceView
+from academics.teacher.views.online_class import TeacherStudentOnlineClassAttendanceView
+from academics.teacher.viewsets.online_class import OnlineClassInfoViewSet
 
 router = routers.DefaultRouter()
 router.register(r"teacher/online_class", OnlineClassInfoViewSet)
