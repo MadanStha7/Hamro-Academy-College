@@ -11,11 +11,11 @@ class GradeSerializer(serializers.ModelSerializer):
     """
 
     grade_name = serializers.CharField(read_only=True)
-    section = SectionSerializer(read_only=True)
+    section_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = TimeTable
-        fields = ["id", "grade", "grade_name", "section"]
+        fields = ["id", "grade", "grade_name", "section", "section_name"]
 
 
 class FacultySerializer(serializers.ModelSerializer):
