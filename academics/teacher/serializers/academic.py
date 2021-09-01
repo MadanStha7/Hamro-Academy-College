@@ -53,3 +53,14 @@ class ShiftSerializer(serializers.ModelSerializer):
             "day_name"
         ]
 
+
+class SectionSerializer(serializers.ModelSerializer):
+    """
+    serializer to get teacher section where teacher has been assigned
+    """
+
+    section_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = TimeTable
+        fields = ["id", "section", "section_name"]
