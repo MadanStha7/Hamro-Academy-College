@@ -11,7 +11,6 @@ class OnlineClassInfoSerializer(serializers.ModelSerializer):
     subject_name = serializers.CharField(read_only=True)
     teacher_first_name = serializers.CharField(read_only=True)
     teacher_last_name = serializers.CharField(read_only=True)
-    class_date = serializers.DateField(required=True)
 
     class Meta:
         model = OnlineClassInfo
