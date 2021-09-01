@@ -3,10 +3,11 @@ from rest_framework import status
 from django_filters import rest_framework as filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from academics.administrator.custom_filter import OnlineClassFilter
+
 from academics.teacher.serializers.online_class import OnlineClassInfoSerializer
 from common.administrator.viewset import CommonInfoViewSet
 from common.utils import active_academic_session
+from onlineclass.administrator.custom.filter import OnlineClassFilter
 from onlineclass.models import OnlineClassInfo
 from permissions.teacher import TeacherPermission
 
