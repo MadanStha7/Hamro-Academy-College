@@ -21,7 +21,8 @@ class GradeAPIView(ListAPIView):
         queryset = TimeTable.objects.filter(teacher=self.request.user,
                                             institution=self.request.institution).order_by(
             "start_time"
-        ).order_by("grade").distinct("grade").annotate(grade_name=F("grade__name"))
+        ).order_by("grade").distinct("grade").annotate(grade_name=F("grade__name"),
+                                                       section_name=F("section__name"),)
         return queryset
 
 
