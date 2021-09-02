@@ -5,17 +5,18 @@ from academics.models import Class, Faculty
 from timetable.models import TimeTable
 
 
-class GradeSerializer(serializers.ModelSerializer):
+class ClassSerializer(serializers.ModelSerializer):
     """
     serializer to get teacher grade where teacher has been assigned
     """
 
     grade_name = serializers.CharField(read_only=True)
     section_name = serializers.CharField(read_only=True)
+    faculty_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = TimeTable
-        fields = ["id", "grade", "grade_name", "section", "section_name"]
+        fields = ["id", "grade", "grade_name", "section", "section_name", "faculty", "faculty_name"]
 
 
 class FacultySerializer(serializers.ModelSerializer):
