@@ -6,6 +6,10 @@ from common.administrator.viewset import CommonInfoViewSet
 
 
 class ClassViewSet(CommonInfoViewSet):
+    """
+    view, where admin can view class
+    """
+
     serializer_class = ClassSerializer
     queryset = Class.objects.none()
 
