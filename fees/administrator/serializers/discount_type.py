@@ -19,3 +19,19 @@ class DiscountTypeSerializer(serializers.ModelSerializer):
         )
         return name
 
+    def validate(self, data):
+        discount_mode = data.get("discount_mode")
+        discount_amount = data.get("discount_amount")
+
+        if discount_mode == "P":
+            if discount_amount > 100:
+                raise serializers.ValidationError(
+                    "Discount percent cannot be higher than 100%"
+                )
+        else:
+            if discount_amount < 0:
+                raise serializers.ValidationError(
+                    "Discount amount cannot be less than 0"
+                )
+
+        return data
