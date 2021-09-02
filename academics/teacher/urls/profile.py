@@ -1,4 +1,9 @@
-from django.urls import path
-from academics.teacher.viewsets.profile import TeacherProfileView
+from django.urls import path, include
+from academics.teacher.views.profile import TeacherProfileView
 
-urlpatterns = [path("teacher/profile/<pk>/", TeacherProfileView.as_view())]
+teacher_urlpatterns = [path("profile/<pk>/", TeacherProfileView.as_view())]
+
+
+urlpatterns = [path("teacher/", include(teacher_urlpatterns))]
+
+

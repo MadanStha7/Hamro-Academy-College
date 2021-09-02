@@ -25,7 +25,6 @@ class GuardianInfoSerializer(serializers.ModelSerializer):
             "address",
             "relation",
             "photo",
-            "phone",
             "occupation",
             "institution",
             "created_by",

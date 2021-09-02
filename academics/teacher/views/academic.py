@@ -1,7 +1,11 @@
 from django.db.models import F
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from academics.teacher.serializers.academic import GradeSerializer, FacultySerializer, ShiftSerializer
+
+from django_filters import rest_framework as filters
+from academics.administrator.custom_filter import  TeacherClassFilter
+from academics.teacher.serializers.academic import GradeSerializer, FacultySerializer, ShiftSerializer, \
+    SectionSerializer, ClassSerializer
 from permissions.teacher import TeacherPermission
 from timetable.models import TimeTable
 
@@ -19,7 +23,8 @@ class GradeAPIView(ListAPIView):
         queryset = TimeTable.objects.filter(teacher=self.request.user,
                                             institution=self.request.institution).order_by(
             "start_time"
-        ).order_by("grade").distinct("grade").annotate(grade_name=F("grade__name"))
+        ).order_by("grade").distinct("grade").annotate(grade_name=F("grade__name"),
+                                                       section_name=F("section__name"),)
         return queryset
 
 
@@ -61,7 +66,41 @@ class ShiftAPIView(ListAPIView):
         return queryset
 
 
+class SectionAPIView(ListAPIView):
+    """
+    api view of teacher for viewing the section where he has been assigned
+    """
+
+    serializer_class = SectionSerializer
+    permission_classes = (IsAuthenticated, TeacherPermission)
+    queryset = TimeTable.objects.none()
+
+    def get_queryset(self):
+        queryset = TimeTable.objects.filter(teacher=self.request.user,
+                                            institution=self.request.institution).order_by(
+            "start_time"
+        ).order_by("section").distinct("section").annotate(section_name=F("section__name"))
+        return queryset
 
 
+class ClassAPIView(ListAPIView):
+    """
+    api view of teacher for viewing the class where he has been assigned
+    """
+
+    serializer_class = ClassSerializer
+    permission_classes = (IsAuthenticated, TeacherPermission)
+    queryset = TimeTable.objects.none()
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_class = TeacherClassFilter
+
+    def get_queryset(self):
+        queryset = TimeTable.objects.filter(teacher=self.request.user,
+                                            institution=self.request.institution).order_by(
+            "start_time"
+        ).order_by("grade").distinct("grade").annotate(grade_name=F("grade__name"),
+                                                       section_name=F("section__name"),
+                                                       faculty_name=F("faculty__name"),)
+        return queryset
 
 
