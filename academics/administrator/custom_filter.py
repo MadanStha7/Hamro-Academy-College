@@ -63,3 +63,12 @@ class ClassFilter(django_filters.rest_framework.FilterSet):
     class Meta:
         model = Class
         fields = ["faculty", "grade"]
+
+
+class TeacherClassFilter(django_filters.rest_framework.FilterSet):
+    faculty = django_filters.UUIDFilter(field_name='faculty_id', lookup_expr='exact')
+    grade = django_filters.UUIDFilter(field_name='grade__id', lookup_expr='exact')
+
+    class Meta:
+        model = TimeTable
+        fields = ["faculty", "grade"]
