@@ -1,22 +1,18 @@
 from rest_framework import serializers
-
-from academics.administrator.serializers.section import SectionSerializer
-from academics.models import Class, Faculty
 from timetable.models import TimeTable
 
 
-class ClassSerializer(serializers.ModelSerializer):
+class GradeSerializer(serializers.ModelSerializer):
     """
     serializer to get teacher grade where teacher has been assigned
     """
 
     grade_name = serializers.CharField(read_only=True)
     section_name = serializers.CharField(read_only=True)
-    faculty_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = TimeTable
-        fields = ["id", "grade", "grade_name", "section", "section_name", "faculty", "faculty_name"]
+        fields = ["id", "grade", "grade_name", "section", "section_name"]
 
 
 class FacultySerializer(serializers.ModelSerializer):
@@ -65,3 +61,17 @@ class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = TimeTable
         fields = ["id", "section", "section_name"]
+
+
+class ClassSerializer(serializers.ModelSerializer):
+    """
+    serializer to get teacher grade where teacher has been assigned
+    """
+
+    grade_name = serializers.CharField(read_only=True)
+    section_name = serializers.CharField(read_only=True)
+    faculty_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = TimeTable
+        fields = ["id", "grade", "grade_name", "section", "section_name", "faculty", "faculty_name"]
