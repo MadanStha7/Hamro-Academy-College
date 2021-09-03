@@ -22,9 +22,9 @@ class TeacherTimeTableAPIView(ListAPIView):
         """api to get list of timetable"""
         queryset = TimeTable.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(
-            subject__name=F("subject__name"),
-            teacher__firstname=F("teacher__first_name"),
-            teacher__lastname=F("teacher__last_name"),
+            subject_name=F("subject__name"),
+            teacher_firstname=F("teacher__first_name"),
+            teacher_lastname=F("teacher__last_name"),
         ).order_by("start_time")
         queryset = self.filter_queryset(queryset)
         serializer = TeacherTimeTableSerializer(queryset, many=True)
