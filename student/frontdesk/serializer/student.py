@@ -15,6 +15,9 @@ User = get_user_model()
 
 class StudentListInfoSerializer(serializers.ModelSerializer):
     student_first_name = serializers.CharField(read_only=True)
+    student_middle_name = serializers.CharField(read_only=True)
+    student_email = serializers.CharField(read_only=True)
+    student_phone = serializers.CharField(read_only=True)
     relation_name = serializers.CharField(read_only=True)
     student_last_name = serializers.CharField(read_only=True)
     guardian_first_name = serializers.CharField(read_only=True)
@@ -23,7 +26,6 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
     grade = serializers.CharField(read_only=True)
     section = serializers.CharField(read_only=True)
     relation = serializers.CharField(read_only=True)
-    phone = serializers.CharField(read_only=True)
     email = serializers.CharField(read_only=True)
 
     class Meta:
@@ -31,14 +33,16 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "student_first_name",
+            "student_middle_name",
             "student_last_name",
+            "student_email",
+            "student_phone",
             "faculty",
             "grade",
             "section",
             "guardian_first_name",
             "guardian_last_name",
             "relation",
-            "phone",
             "email",
             "relation_name",
         ]
