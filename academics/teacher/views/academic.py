@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from django_filters import rest_framework as filters
-from academics.administrator.custom_filter import  TeacherClassFilter
+from academics.administrator.custom_filter import TeacherClassFilter, TeacherTimeTableFilter
 from academics.teacher.serializers.academic import GradeSerializer, FacultySerializer, ShiftSerializer, \
     SectionSerializer, ClassSerializer
 from permissions.teacher import TeacherPermission
@@ -53,6 +53,8 @@ class ShiftAPIView(ListAPIView):
     serializer_class = ShiftSerializer
     permission_classes = (IsAuthenticated, TeacherPermission)
     queryset = TimeTable.objects.none()
+    filter_backends = [filters.DjangoFilterBackend]
+    filter_class = TeacherTimeTableFilter
 
     def get_queryset(self):
         queryset = TimeTable.objects.filter(teacher=self.request.user,
@@ -61,7 +63,8 @@ class ShiftAPIView(ListAPIView):
             section_name=F("section__name"),
             grade_name=F("grade__name"),
             subject_name=F("subject__name"),
-            shift_time=F("start_time")
+            shift_time=F("start_time"),
+            faculty_name=F("faculty__name")
         )
         return queryset
 

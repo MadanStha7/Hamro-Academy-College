@@ -1,7 +1,5 @@
 from django.db.models import F
-from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-
 from academics.administrator.custom_filter import ClassFilter
 from academics.models import Class
 from academics.administrator.serializers.class_serializer import ClassSerializer
