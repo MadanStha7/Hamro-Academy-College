@@ -28,5 +28,11 @@ class StudentRegularClassView(ListAPIView):
             faculty=student_academic_id.faculty,
             is_regular=True,
         )
+        queryset = queryset.annotate(
+            faculty_name=F("faculty__name"),
+            grade_name=F("grade__name"),
+            section_name=F("section__name"),
+            subject_name=F("subject__name"),
+        )
 
         return queryset
