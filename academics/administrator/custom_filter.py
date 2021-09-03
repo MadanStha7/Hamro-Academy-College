@@ -35,16 +35,17 @@ class TimeTableFilter(django_filters.rest_framework.FilterSet):
 
     class Meta:
         model = SubjectGroup
-        fields = ["grade", "section", "subject", "faculty"]
+        fields = ["grade", "section", "subject"]
 
 
 class TeacherTimeTableFilter(django_filters.rest_framework.FilterSet):
     grade = django_filters.UUIDFilter(field_name='grade__id', lookup_expr='exact')
     section = django_filters.UUIDFilter(field_name='section__id', lookup_expr='exact')
+    faculty = django_filters.UUIDFilter(field_name='faculty__id', lookup_expr='exact')
 
     class Meta:
         model = TimeTable
-        fields = ["grade", "section"]
+        fields = ["grade", "section", "faculty", "day"]
 
 
 class OnlineClassFilter(django_filters.rest_framework.FilterSet):
