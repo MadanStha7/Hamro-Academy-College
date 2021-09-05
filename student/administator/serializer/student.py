@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from common.constant import SYSTEM_DEFAULT_PASSWORD
 from common.utils import validate_unique_phone, to_internal_value
+
 from student.models import StudentInfo
 
 User = get_user_model()
@@ -15,6 +16,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "phone", "first_name", "middle_name", "last_name", "email")
+
+        extra_kwargs = {
+            "phone": {"validators": []},
+        }
 
 
 class StudentListInfoSerializer(serializers.ModelSerializer):
@@ -45,7 +50,7 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
             "relation",
             "phone",
             "email",
-            "status"
+            "status",
         ]
 
 
@@ -55,10 +60,16 @@ class StudentInfoSerializer(serializers.ModelSerializer):
     student_first_name = serializers.CharField(read_only=True)
     student_middle_name = serializers.CharField(read_only=True)
     student_last_name = serializers.CharField(read_only=True)
-    blood_group_display = serializers.CharField(read_only=True, source="get_blood_group_display")
-    religion_display = serializers.CharField(read_only=True, source="get_religion_display")
+    blood_group_display = serializers.CharField(
+        read_only=True, source="get_blood_group_display"
+    )
+    religion_display = serializers.CharField(
+        read_only=True, source="get_religion_display"
+    )
     gender_display = serializers.CharField(read_only=True, source="get_gender_display")
-    photo = serializers.SerializerMethodField(read_only=True, required=False, allow_null=True)
+    photo = serializers.SerializerMethodField(
+        read_only=True, required=False, allow_null=True
+    )
 
     def get_photo(self, obj):
         return obj.photo.url if obj.photo else None
@@ -109,24 +120,26 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         phone = user.get("phone")
         # phone number between 7 to 14
         if len(phone) < 7 or len(phone) > 14:
-            raise serializers.ValidationError("length of phone number should be more than 7 and less than 14!")
-        phone = validate_unique_phone(
-            User, phone, self.context.get("institution"), self.instance
-        )
+            raise serializers.ValidationError(
+                "length of phone number should be more than 7 and less than 14!"
+            )
         return user
 
     def create(self, validated_data):
+
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            user = User.objects.create(
-                                       phone=user.get("phone"),
-                                       first_name=user.get("first_name"),
-                                       middle_name=user.get("middle_name"),
-                                       last_name=user.get("last_name"),
-                                       email=user.get("email"),
-                                       institution=self.context.get("institution"),
-                                       )
+            user = User.objects.update_or_create(
+                phone=user.get("phone"),
+                default={
+                    "first_name": user.get("first_name"),
+                    "last_name": user.get("last_name"),
+                    "middle_name": user.get("middle_name"),
+                    "email": user.get("email"),
+                    "institution": self.context.get("institution"),
+                },
+            )
             student = StudentInfo(user=user, **validated_data)
 
             created_by = validated_data.get("created_by")
@@ -150,18 +163,23 @@ class StudentInfoSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        if validated_data.get("photo"):
-            instance.photo = to_internal_value(
-                validated_data.pop("photo")
-            )
-            instance.save()
-        if validated_data.get("user"):
-            student_data = validated_data.pop("user")
-            user_serializer = UserSerializer(
-                data=student_data, instance=instance.user
-            )
-            user_serializer.is_valid(raise_exception=True)
-            user_serializer.save()
-
-        super(StudentInfoSerializer, self).update(instance, validated_data)
-        return instance
+        user_data = validated_data.pop("user")
+        users_obj = self.instance.user
+        userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
+        if userSerializer.is_valid(raise_exception=True):
+            if validated_data.get("photo"):
+                instance.photo = to_internal_value(validated_data.pop("photo"))
+                instance.save()
+            if validated_data.get("user"):
+                student_data = validated_data.pop("user")
+                user_serializer = UserSerializer(
+                    data=student_data, instance=instance.user
+                )
+                user_serializer.is_valid(raise_exception=True)
+                print(user_serializer.validated_data.get("phone"))
+                user, created = User.objects.update_or_create(
+                    phone=user_serializer.validated_data.get("phone"),
+                    defaults={**user_serializer.validated_data},
+                )
+                instance.user = user
+            return super(StudentInfoSerializer, self).update(instance, validated_data)
