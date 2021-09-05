@@ -9,6 +9,10 @@ from permissions.administrator import AdministratorPermission
 
 
 class ClassViewSet(CommonInfoViewSet):
+    """
+    view, where admin can view class
+    """
+
     serializer_class = ClassSerializer
     queryset = Class.objects.none()
     filter_backends = (filters.DjangoFilterBackend,)
