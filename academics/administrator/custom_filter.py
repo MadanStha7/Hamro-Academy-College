@@ -1,6 +1,5 @@
 import django_filters
 from academics.models import ApplyShift, Class
-from academics.models import SubjectGroup
 from onlineclass.models import OnlineClassInfo
 
 
