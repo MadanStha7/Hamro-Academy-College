@@ -13,6 +13,10 @@ from rest_framework import status
 
 
 class GuardianInfoViewSet(CommonInfoViewSet):
+    """
+    CRUD for guardian of student
+    """
+
     queryset = StudentGuardianInfo.objects.none()
     serializer_class = GuardianInfoSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
@@ -30,6 +34,9 @@ class GuardianInfoViewSet(CommonInfoViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        """
+        create guardian api
+        """
         photo = self.request.data.get("photo")
         serializer.save(
             photo=photo,
@@ -53,6 +60,10 @@ class GuardianInfoViewSet(CommonInfoViewSet):
 
 
 class StudentGuardianInfoView(CreateAPIView):
+    """
+      CRUD for new as well existing guardian of student
+      """
+
     queryset = StudentGuardianInfo.objects.none()
     serializer_class = GuardianInfoSerializer
 
@@ -69,7 +80,7 @@ class StudentGuardianInfoView(CreateAPIView):
                 student = StudentInfo.objects.get(id=student)
                 student.guardian_detail = guardian
                 student.save()
-                return Response({"message": "success"}, status=status.HTTP_200_OK)
+                return Response({"message": ["guardian of this already exist"]}, status=status.HTTP_200_OK)
 
             elif new == "true":
                 photo = self.request.data.get("photo")
@@ -84,7 +95,9 @@ class StudentGuardianInfoView(CreateAPIView):
                 )
                 student.guardian_detail = guardian
                 student.save()
-                return Response({"message": "success"}, status=status.HTTP_200_OK)
+                data = serializer.data
+                headers = self.get_success_headers(serializer.data)
+                return Response(data, status=status.HTTP_201_CREATED, headers=headers)
 
             return Response(
                 {"message": ["You must be a institute student to perform this action"]}

@@ -1,16 +1,18 @@
 import base64
 import uuid
-
 from django.core.files.base import ContentFile
-from django.db import transaction, IntegrityError
 from django.db.models import Q
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from academics.models import Grade, ApplyShift, Faculty, Shift, Section
-from common.constant import GRADE_CHOICES, SUBJECT_TYPES
+from common.constant import (
+    GRADE_CHOICES,
+    SUBJECT_TYPES,
+    SELECT_GENDER,
+    SELECT_MARK_TYPE,
+    SELECT_MARITAL_STATUS,
+)
 from general.models import AcademicSession
 
 
@@ -31,15 +33,15 @@ def get_subject_type_name_of_value(name):
 def validate_unique_name(model, value, institution, instance):
     if instance:
         if model.objects.filter(
-                ~Q(id=instance.id), name=value.title(), institution=institution
+            ~Q(id=instance.id), name=value.title(), institution=institution
         ).exists():
-            raise serializers.ValidationError(
-                f"{model.__name__} with this name already exists"
+            raise ValidationError(
+                {"message": [f"{model.__name__} with this name already exists"]}
             )
     else:
         if model.objects.filter(name=value.title(), institution=institution).exists():
-            raise serializers.ValidationError(
-                f"{model.__name__} with this name already exists"
+            raise ValidationError(
+                {"message": [f"{model.__name__} with this name already exists"]}
             )
 
     return value
@@ -48,7 +50,7 @@ def validate_unique_name(model, value, institution, instance):
 def validate_unique_role(model, title, institution, instance):
     if instance:
         if model.objects.filter(
-                ~Q(id=instance.id), title=title, institution=institution
+            ~Q(id=instance.id), title=title, institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this Group already exists."
@@ -100,17 +102,17 @@ def to_internal_value(data):
 def validate_unique_faculty_grade(model, value, institution, instance):
     if instance:
         if model.objects.filter(
-                ~Q(id=instance.id),
-                faculty=value["faculty"],
-                grade=value["grade"],
-                institution=institution,
+            ~Q(id=instance.id),
+            faculty=value["faculty"],
+            grade=value["grade"],
+            institution=institution,
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this faculty and grade already exists"
             )
     else:
         if model.objects.filter(
-                faculty=value["faculty"], grade=value["grade"], institution=institution
+            faculty=value["faculty"], grade=value["grade"], institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this faculty and grade already exists"
@@ -123,7 +125,7 @@ def validate_unique_phone(model, phone, institution, instance):
     if instance:
 
         if model.objects.filter(
-                ~Q(id=instance.user.id), phone=phone, institution=institution
+            ~Q(id=instance.user.id), phone=phone, institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this phone number already exists"
@@ -152,7 +154,7 @@ def active_academic_session(institution):
 def validate_unique_email(model, email, institution, instance):
     if instance:
         if model.objects.filter(
-                ~Q(id=instance.user.id), email=email, institution=institution
+            ~Q(id=instance.user.id), email=email, institution=institution
         ).exists():
             raise serializers.ValidationError(
                 f"{model.__name__} with this email already exists"
@@ -166,53 +168,53 @@ def validate_unique_email(model, email, institution, instance):
     return email
 
 
-def create_applyshift(infos, user, institution):
-    print("infos", infos)
-    new_applyshift = []
-    updated_applyshift = []
+def return_gender_value(name):
+    for gender in SELECT_GENDER:
+        if gender[0] == name:
+            return gender[1]
+    return None
 
-    # for case of update
-    for info in infos:
-        get_id = info.get("id", None)
-        print(get_id)
-        if get_id:
-            applyshift = ApplyShift(id=info.get("id"))
-            applyshift.faculty = Faculty(id=info.get("faculty"))
-            applyshift.grade = Grade(id=info.get("grade"))
-            applyshift.shift = Shift(id=info.get("shift"))
-            applyshift.section = Section(id=info.get("section"))
-            updated_applyshift.append(applyshift)
 
-        # for case of create
-        else:
-            print(info.get("shift"))
-            applyshift = ApplyShift(
-                faculty=Faculty(id=info.get("faculty")),
-                grade=Grade(id=info.get("grade")),
-                shift=Shift(id=info.get("shift")),
-                created_by=user,
-                institution=institution,
+def return_marks_types_value(name):
+    for marks_types in SELECT_MARK_TYPE:
+        if marks_types[0] == name:
+            return marks_types[1]
+    return None
+
+
+def return_marital_status_value(name):
+    for marital_status in SELECT_MARITAL_STATUS:
+        if marital_status[0] == name:
+            return marital_status[1]
+    return None
+
+
+def validate_unique_mobile_number(model, phone, institution, instance):
+    if instance:
+
+        if model.objects.filter(
+            ~Q(id=instance.id), contact_number=phone, institution=institution
+        ).exists():
+            raise serializers.ValidationError("phone number already exists")
+    else:
+        if model.objects.filter(contact_number=phone, institution=institution).exists():
+            raise serializers.ValidationError("phone number already exists")
+
+    return phone
+
+
+def validate_Inquery_unique_email(model, email, institution, instance):
+    if instance:
+        if model.objects.filter(
+            ~Q(id=instance.id), email=email, institution=institution
+        ).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
+            )
+    else:
+        if model.objects.filter(email=email, institution=institution).exists():
+            raise serializers.ValidationError(
+                f"{model.__name__} with this email already exists"
             )
 
-            if info.get("section"):
-                applyshift.section = Section(id=info.get("section"))
-            new_applyshift.append(applyshift)
-
-    with transaction.atomic():
-        try:
-            applyshift_create = ApplyShift.objects.bulk_create(new_applyshift)
-        except IntegrityError:
-            raise ValidationError({"error": ["duplicate applyshift is not allowed"]})
-
-        ApplyShift.objects.bulk_update(
-            updated_applyshift,
-            [
-                "faculty",
-                "grade",
-                "shift",
-            ],
-        )
-        return {
-            "data1": applyshift_create if applyshift_create else [],
-            "data2": updated_applyshift if updated_applyshift else [],
-        }
+    return email

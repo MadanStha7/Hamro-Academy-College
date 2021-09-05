@@ -1,9 +1,14 @@
-from academics.models import Faculty, Grade, Shift, Section
+from academics.models import Faculty, Grade, Shift, Section, Subject
 from timetable.administrator.serializers.timetable import (
     TimeTableSerializer,
     TimetableListSerialzer,
+    TimeTableMultipleCreateSerializer,
 )
-from timetable.administrator.utils.create_timetable import create_timetable
+from general.models import AcademicSession
+from timetable.administrator.utils.create_timetable import (
+    create_timetable,
+    create_apply_timetable,
+)
 from timetable.models import Staff
 from common.administrator.viewset import CommonInfoViewSet
 from timetable.models import TimeTable
@@ -19,7 +24,8 @@ from rest_framework import status
 from django.db.models import F
 from rest_framework import filters
 from collections import defaultdict
-
+from django.db import transaction
+from rest_framework.exceptions import ValidationError
 import django_filters.rest_framework
 
 User = get_user_model()
@@ -70,7 +76,7 @@ class TimeTableViewSet(CommonInfoViewSet):
     @action(detail=False, methods=["POST", "PUT"])
     def save_bulk_timetable(self, request):
         """ "
-        Add bulk timetable
+        Api to create bulk timetable and bulk update
         """
         faculty = self.request.query_params.get("faculty", False)
         grade = self.request.query_params.get("grade", False)
@@ -79,20 +85,26 @@ class TimeTableViewSet(CommonInfoViewSet):
         day = self.request.query_params.get("day", False)
 
         if faculty:
-            faculty_obj = get_object_or_404(Faculty, id=faculty)
+            faculty_obj = get_object_or_404(
+                Faculty, id=faculty, institution=self.request.institution
+            )
 
         if grade:
-            grade_obj = get_object_or_404(Grade, id=grade)
+            grade_obj = get_object_or_404(
+                Grade, id=grade, institution=self.request.institution
+            )
 
         if shift:
-            shift_obj = get_object_or_404(Shift, id=shift)
+            shift_obj = get_object_or_404(
+                Shift, id=shift, institution=self.request.institution
+            )
 
         if section:
-            section_obj = get_object_or_404(Section, id=section)
+            section_obj = get_object_or_404(
+                Section, id=section, institution=self.request.institution
+            )
         else:
             section_obj = None
-        print("request data###", request.data)
-        print("faculty_obj###", type(faculty_obj))
 
         if faculty_obj and grade_obj and shift_obj:
             list(
@@ -131,6 +143,72 @@ class TimeTableViewSet(CommonInfoViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+    @action(detail=False, methods=["POST"])
+    def apply_timetable(self, request):
+        """
+        Api to create bulk timetable based on the provided multiple days
+        """
+        with transaction.atomic():
+            faculty = self.request.query_params.get("faculty", False)
+            grade = self.request.query_params.get("grade", False)
+            shift = self.request.query_params.get("shift", False)
+            section = self.request.query_params.get("section", False)
+
+            if faculty:
+                faculty_obj = get_object_or_404(
+                    Faculty, id=faculty, institution=self.request.institution
+                )
+
+            if grade:
+                grade_obj = get_object_or_404(
+                    Grade, id=grade, institution=self.request.institution
+                )
+
+            if shift:
+                shift_obj = get_object_or_404(
+                    Shift, id=shift, institution=self.request.institution
+                )
+
+            if section:
+                section_obj = get_object_or_404(
+                    Section, id=section, institution=self.request.institution
+                )
+            else:
+                section_obj = None
+
+            if faculty_obj and grade_obj and shift_obj:
+                print("data", request.data["data"])
+                print("data", type(request.data["data"]))
+                for data in request.data["data"]:
+                    data.update(
+                        {
+                            "faculty": faculty_obj,
+                            "grade": grade_obj,
+                            "shift": shift_obj,
+                            "section": section_obj,
+                        }
+                    )
+                print("ram", request.data)
+                data = request.data["data"]
+                serializer = TimetableListSerialzer(
+                    data=request.data["data"], many=True
+                )
+                if serializer.is_valid():
+                    response = create_apply_timetable(
+                        request.data["data"],
+                        request.data["days"],
+                        self.request.user,
+                        self.request.institution,
+                    )
+                    serializer = TimetableListSerialzer(response["data"], many=True)
+                    if response:
+                        return Response(serializer.data, status=status.HTTP_201_CREATED)
+                else:
+                    return Response(
+                        {"error": serializer.errors},
+                        status=status.HTTP_404_NOT_FOUND,
+                    )
+
 
 class TeacherListView(APIView):
     """API to get list of all teachers of particular institution"""
@@ -147,7 +225,7 @@ class TeacherListView(APIView):
                 teacher_data.append(
                     {
                         "id_of_teacher": teacher.id,
-                        "full_name": teacher.first_name + "" + teacher.last_name,
+                        "full_name": teacher.first_name + " " + teacher.last_name,
                     }
                 )
             return Response(teacher_data)

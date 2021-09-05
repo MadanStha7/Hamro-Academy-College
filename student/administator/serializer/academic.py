@@ -11,6 +11,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
     section_name = serializers.CharField(read_only=True)
     grade_name = serializers.CharField(read_only=True)
     faculty_name = serializers.CharField(read_only=True)
+    shift_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = StudentAcademicDetail
@@ -26,6 +27,7 @@ class StudentAcademicSerializer(serializers.ModelSerializer):
             "faculty_name",
             "faculty",
             "shift",
+            "shift_name",
             "academic_session",
             "institution"
         ]
@@ -41,11 +43,13 @@ class StudentAcademicDetailSerializer(serializers.Serializer):
         with transaction.atomic():
             previous_details = validated_data.pop("previous_academic")
             student_academics = validated_data.pop("student_academic")
-            previous_academic = PreviousAcademicDetail.objects.create(
-                **previous_details
+            previous_academic, created = PreviousAcademicDetail.objects.update_or_create(
+                    student=previous_details.get("student"), defaults={**previous_details}
+                )
+            student_academic, created = StudentAcademicDetail.objects.update_or_create(
+                student=student_academics.get("student"), academic_session__status=True,
+                defaults={**student_academics}
             )
-            if not StudentAcademicDetail.objects.filter(student=student_academics.get("student"),
-                                                        academic_session__status=True):
-                student_academic = StudentAcademicDetail.objects.create(**student_academics)
-                return student_academic
-            return student_academics
+            context = {"student_academic": student_academic,
+                       "previous_academic": previous_academic}
+            return context

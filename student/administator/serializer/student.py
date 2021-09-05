@@ -6,15 +6,20 @@ from rest_framework import serializers
 
 from common.constant import SYSTEM_DEFAULT_PASSWORD
 from common.utils import validate_unique_phone, to_internal_value
-from staff.administrator.serializers.staff import UserSerializer
 from student.models import StudentInfo
-
 
 User = get_user_model()
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "phone", "first_name", "middle_name", "last_name", "email")
+
+
 class StudentListInfoSerializer(serializers.ModelSerializer):
     student_first_name = serializers.CharField(read_only=True)
+    student_middle_name = serializers.CharField(read_only=True)
     student_last_name = serializers.CharField(read_only=True)
     guardian_first_name = serializers.CharField(read_only=True)
     guardian_last_name = serializers.CharField(read_only=True)
@@ -30,6 +35,7 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "student_first_name",
+            "student_middle_name",
             "student_last_name",
             "faculty",
             "grade",
@@ -38,13 +44,20 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
             "guardian_last_name",
             "relation",
             "phone",
-            "email"
+            "email",
+            "status"
         ]
 
 
 class StudentInfoSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     category_name = serializers.CharField(read_only=True)
+    student_first_name = serializers.CharField(read_only=True)
+    student_middle_name = serializers.CharField(read_only=True)
+    student_last_name = serializers.CharField(read_only=True)
+    blood_group_display = serializers.CharField(read_only=True, source="get_blood_group_display")
+    religion_display = serializers.CharField(read_only=True, source="get_religion_display")
+    gender_display = serializers.CharField(read_only=True, source="get_gender_display")
     photo = serializers.SerializerMethodField(read_only=True, required=False, allow_null=True)
 
     def get_photo(self, obj):
@@ -54,6 +67,7 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         model = StudentInfo
         read_only_fields = [
             "institution",
+            "status",
             "created_by",
             "created_on",
             "admission_number",
@@ -63,16 +77,23 @@ class StudentInfoSerializer(serializers.ModelSerializer):
             "photo",
             "admission_number",
             "user",
+            "student_first_name",
+            "student_middle_name",
+            "student_last_name",
             "permanent_address",
             "temporary_address",
             "dob",
             "gender",
+            "gender_display",
             "blood_group",
+            "blood_group_display",
             "religion",
+            "religion_display",
             "student_category",
             "category_name",
             "guardian_detail",
             "disable",
+            "status",
             "institution",
             "created_by",
             "created_on",
@@ -98,17 +119,26 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            all_name = user["full_name"].strip().split()
-            first_name, last_name = all_name[0], all_name[1:]
-            last_name_all = " ".join(last_name)
             user = User.objects.create(
-                phone=user.get("phone"),
-                first_name=first_name,
-                last_name=last_name_all,
-                email=user.get("email"),
-                institution=self.context.get("institution"),
-            )
-            student = StudentInfo.objects.create(user=user, **validated_data)
+                                       phone=user.get("phone"),
+                                       first_name=user.get("first_name"),
+                                       middle_name=user.get("middle_name"),
+                                       last_name=user.get("last_name"),
+                                       email=user.get("email"),
+                                       institution=self.context.get("institution"),
+                                       )
+            student = StudentInfo(user=user, **validated_data)
+
+            created_by = validated_data.get("created_by")
+            for item in created_by.roles.all():
+                if item.title == "Administrator":
+                    student.status = "A"
+
+                elif item.title == "Front Desk Officer":
+                    student.status = "D"
+                else:
+                    pass
+            student.save()
             student.user.username = student.admission_number
             user.set_password(SYSTEM_DEFAULT_PASSWORD)
             student.user.save()
@@ -118,25 +148,20 @@ class StudentInfoSerializer(serializers.ModelSerializer):
 
             return student
 
-    def update(self, instance, validated_data, *args, **kwargs):
-        with transaction.atomic():
-            user_data = validated_data.pop("user")
-            users_obj = self.instance.user
-            instance.photo = validated_data.get("photo", instance.photo)
-            instance.permanent_address = validated_data.get("permanent_address", instance.permanent_address)
-            instance.temporary_address = validated_data.get("temporary_address", instance.temporary_address)
-            instance.dob = validated_data.get("dob", instance.dob)
-            userserializer = UserSerializer(users_obj, data=user_data, partial=True)
-            if userserializer.is_valid(raise_exception=True):
-                all_name = userserializer.validated_data["full_name"].strip().split()
-                first_name, last_name = all_name[0], all_name[1:]
-                userserializer.save()
-                last_name_all = " ".join(last_name)
-                user_data_obj = User.objects.get(id=self.instance.user.id)
-                user_data_obj.first_name = first_name
-                user_data_obj.last_name = last_name_all
-                user_data_obj.save()
-            return instance
+    @transaction.atomic
+    def update(self, instance, validated_data):
+        if validated_data.get("photo"):
+            instance.photo = to_internal_value(
+                validated_data.pop("photo")
+            )
+            instance.save()
+        if validated_data.get("user"):
+            student_data = validated_data.pop("user")
+            user_serializer = UserSerializer(
+                data=student_data, instance=instance.user
+            )
+            user_serializer.is_valid(raise_exception=True)
+            user_serializer.save()
 
-
-
+        super(StudentInfoSerializer, self).update(instance, validated_data)
+        return instance

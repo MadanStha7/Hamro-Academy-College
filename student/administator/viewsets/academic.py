@@ -1,5 +1,6 @@
 from django.db.models import F
 from django_filters import rest_framework as filters
+from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from common.administrator.viewset import CommonInfoViewSet
@@ -25,7 +26,8 @@ class StudentAcademicViewSet(CommonInfoViewSet):
         ).annotate(
             section_name=F("section__name"),
             grade_name=F("grade__name"),
-            faculty_name=F("faculty__name")
+            faculty_name=F("faculty__name"),
+            shift_name=F("shift__name"),
         )
         return queryset
 
@@ -51,10 +53,14 @@ class StudentAcademicViewSet(CommonInfoViewSet):
         serializer = StudentAcademicDetailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        return Response(
-            {
-                "message": "student academic is  successfully created"
-            }
-        )
+        print(serializer.data, "avaab")
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+        # return Response(
+        #     {
+        #         "message": "student academic is  successfully created"
+        #     }
+        # )
 
 

@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from staff.models import Staff
-from common.utils import validate_unique_phone, validate_unique_email
+from user.administrator.serializers.role import RoleSerializer
+from common.utils import (
+    validate_unique_phone,
+    validate_unique_email,
+    return_marital_status_value,
+)
 from academics.models import Faculty, Grade
 from common.utils import to_internal_value
 from django.db import transaction
@@ -11,20 +16,29 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    phone = serializers.CharField()
+
     full_name = serializers.CharField(write_only=True)
-    email = serializers.EmailField()
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+
 
     class Meta:
         model = User
-        read_only_fields = ["first_name", "last_name"]
-        fields = ("id", "phone", "full_name", "email")
+        fields = ("id", "phone", "full_name", "email", "first_name", "last_name")
 
 
 class StaffSerializer(serializers.ModelSerializer):
     photo = serializers.CharField()
     designation__name = serializers.CharField(read_only=True)
     user = UserSerializer()
+
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        res["roles"] = RoleSerializer(
+            instance.user.roles.all().values("id", "title"), many=True
+        ).data
+        res["marital_status_value"] = return_marital_status_value(res["marital_status"])
+        return res
 
     class Meta:
         model = Staff
@@ -39,6 +53,7 @@ class StaffSerializer(serializers.ModelSerializer):
             "marital_status",
             "spouse_name",
             "designation__name",
+            "marital_status",
         ]
 
     def validate(self, attrs):
@@ -51,7 +66,6 @@ class StaffSerializer(serializers.ModelSerializer):
         """check that faculty name is already exist"""
         phone = user.get("phone")
         email = user.get("email")
-
         # phone number between 10 to 15
         if len(phone) < 10 or len(phone) > 15:
             raise serializers.ValidationError("enter the correct phone number!")
@@ -89,10 +103,6 @@ class StaffSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user_data = validated_data.pop("user")
         users_obj = self.instance.user
-        instance.photo = validated_data.get("photo", instance.photo)
-        instance.designation = validated_data.get("designation", instance.designation)
-        instance.address = validated_data.get("address", instance.address)
-        instance.dob = validated_data.get("dob", instance.dob)
         userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
         if userSerializer.is_valid(raise_exception=True):
             full_name = userSerializer.validated_data["full_name"].strip().split()
@@ -103,6 +113,7 @@ class StaffSerializer(serializers.ModelSerializer):
             user_data_obj.first_name = first_name
             user_data_obj.last_name = last_name_all
             user_data_obj.save()
+        super(StaffSerializer, self).update(instance, validated_data)
         return instance
 
 
@@ -117,6 +128,12 @@ class StaffListSerializer(serializers.ModelSerializer):
     blood_group_name = serializers.CharField(
         source="get_blood_group_display", read_only=True
     )
+
+    def to_representation(self, instance):
+        res = super().to_representation(instance)
+        res["user"] = UserSerializer(instance.user).data
+        res["marital_status_value"] = return_marital_status_value(res["marital_status"])
+        return res
 
     class Meta:
         model = Staff
@@ -133,6 +150,8 @@ class StaffListSerializer(serializers.ModelSerializer):
             "staff_email",
             "staff_first_name",
             "staff_last_name",
+            "user",
+            "marital_status",
         ]
 
 

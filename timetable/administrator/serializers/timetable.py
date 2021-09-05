@@ -71,3 +71,37 @@ class TimetableListSerialzer(serializers.ModelSerializer):
             "teacher",
             "subject",
         ]
+
+
+class TimeTableMultipleCreateSerializer(serializers.ModelSerializer):
+    """
+    serializer to create multiple timetable
+    """
+
+    days = serializers.ListField(child=serializers.IntegerField(), write_only=True)
+
+    class Meta:
+        model = TimeTable
+        read_only_fields = [
+            "academic_session",
+            "section",
+            "institution",
+            "created_by",
+            "teacher",
+            "subject",
+        ]
+        fields = [
+            "id",
+            "day",
+            "day_name",
+            "start_time",
+            "end_time",
+            "teacher",
+            "subject",
+            "academic_session",
+            "grade_name",
+            "teacher_full_name",
+            "created_by",
+            "subject_name",
+            "section_name",
+        ]
