@@ -16,6 +16,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ("id", "phone", "first_name", "middle_name", "last_name", "email")
 
+        extra_kwargs = {
+            'phone': {'validators': []},
+        }
+
 
 class StudentListInfoSerializer(serializers.ModelSerializer):
     student_first_name = serializers.CharField(read_only=True)
@@ -107,26 +111,21 @@ class StudentInfoSerializer(serializers.ModelSerializer):
     def validate_user(self, user):
         """check that faculty name is already exist"""
         phone = user.get("phone")
-        # phone number between 7 to 14
         if len(phone) < 7 or len(phone) > 14:
             raise serializers.ValidationError("length of phone number should be more than 7 and less than 14!")
-        phone = validate_unique_phone(
-            User, phone, self.context.get("institution"), self.instance
-        )
         return user
 
     def create(self, validated_data):
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            user = User.objects.create(
-                                       phone=user.get("phone"),
-                                       first_name=user.get("first_name"),
-                                       middle_name=user.get("middle_name"),
-                                       last_name=user.get("last_name"),
-                                       email=user.get("email"),
-                                       institution=self.context.get("institution"),
-                                       )
+            user = User.objects.update_or_create(phone=user.get("phone"), default={"first_name": user.get("first_name"),
+                                                                                   "last_name": user.get("last_name"),
+                                                                                   "middle_name": user.get(
+                                                                                       "middle_name"),
+                                                                                   "email": user.get("email"),
+                                                                                   "institution": self.context.get(
+                                                                                       "institution")})
             student = StudentInfo(user=user, **validated_data)
 
             created_by = validated_data.get("created_by")
@@ -161,7 +160,9 @@ class StudentInfoSerializer(serializers.ModelSerializer):
                 data=student_data, instance=instance.user
             )
             user_serializer.is_valid(raise_exception=True)
-            user_serializer.save()
-
-        super(StudentInfoSerializer, self).update(instance, validated_data)
-        return instance
+            print(user_serializer.validated_data.get("phone"))
+            user, created = User.objects.update_or_create(phone=user_serializer.validated_data.get("phone"),
+                                                          defaults={**user_serializer.validated_data}
+                                                          )
+            instance.user = user 
+        return super(StudentInfoSerializer, self).update(instance, validated_data)
