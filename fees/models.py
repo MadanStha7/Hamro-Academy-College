@@ -5,14 +5,14 @@ from common.constant import DISCOUNT_FINE_OPTIONS
 from common.models import CommonInfo
 
 
-class FeeType(CommonInfo):
+class FeeSetup(CommonInfo):
     """
     model to store the fee type
     """
 
     name = models.CharField(max_length=64)
-    faculty = models.ManyToManyField(Faculty, related_name="fee_type")
-    grade = models.ManyToManyField(Grade, related_name="fee_type")
+    faculty = models.ManyToManyField(Faculty, related_name="fee_setup")
+    grade = models.ManyToManyField(Grade, related_name="fee_setup")
     due_date = models.DateField()
 
     def __str__(self):
@@ -20,11 +20,11 @@ class FeeType(CommonInfo):
 
     def save(self, *args, **kwargs):
         self.name = self.name.title()
-        return super(FeeType, self).save(*args, **kwargs)
+        return super(FeeSetup, self).save(*args, **kwargs)
 
     class Meta:
         ordering = ["-created_on"]
-        db_table = "fee_type"
+        db_table = "fee_setup"
 
 
 class DiscountType(CommonInfo):

@@ -19,3 +19,18 @@ class FineTypeSerializer(serializers.ModelSerializer):
             FineType, name, self.context.get("institution"), self.instance
         )
         return name
+
+    def validate(self, data):
+        fine_mode = data.get("fine_mode")
+        fine_amount = data.get("fine_amount")
+
+        if fine_mode == "P":
+            if fine_amount > 100:
+                raise serializers.ValidationError(
+                    "Fine percent cannot be higher than 100%"
+                )
+        else:
+            if fine_amount < 0:
+                raise serializers.ValidationError("Fine amount cannot be less than 0")
+
+        return data
