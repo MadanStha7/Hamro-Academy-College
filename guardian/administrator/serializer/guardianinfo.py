@@ -45,8 +45,8 @@ class GuardianInfoSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            all_name = user["full_name"].strip().split()
-            first_name, last_name = all_name[0], all_name[1:]
+            full_name = user["full_name"].strip().split()
+            first_name, last_name = full_name[0], full_name[1:]
             last_name_all = " ".join(last_name)
             user = User.objects.create(
                 phone=user.get("phone"),
