@@ -19,11 +19,7 @@ class SubjectGroupView(ListAPIView):
     search_fields = ["grade__name", "faculty__name", "section__name"]
 
     def get_queryset(self):
-        grade = self.request.query_params.get("grade")
-        if grade:
-            queryset = SubjectGroup.objects.filter(grade=grade,
-                                                   institution=self.request.institution)
-            return queryset
-        else:
-            raise ValidationError({"grade": ["This field is required query param"]})
+        queryset = SubjectGroup.objects.filter(institution=self.request.institution)
+        return queryset
+
 
