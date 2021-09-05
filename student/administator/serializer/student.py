@@ -6,11 +6,20 @@ from rest_framework import serializers
 
 from common.constant import SYSTEM_DEFAULT_PASSWORD
 from common.utils import validate_unique_phone, to_internal_value
-from staff.administrator.serializers.staff import UserSerializer
+
 from student.models import StudentInfo
 
-
 User = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "phone", "first_name", "middle_name", "last_name", "email")
+
+        extra_kwargs = {
+            'phone': {'validators': []},
+        }
 
 
 class StudentListInfoSerializer(serializers.ModelSerializer):
@@ -99,26 +108,33 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         # phone number between 7 to 14
         if len(phone) < 7 or len(phone) > 14:
             raise serializers.ValidationError("length of phone number should be more than 7 and less than 14!")
-        phone = validate_unique_phone(
-            User, phone, self.context.get("institution"), self.instance
-        )
         return user
 
     def create(self, validated_data):
+
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            all_name = user["full_name"].strip().split()
-            first_name, last_name = all_name[0], all_name[1:]
-            last_name_all = " ".join(last_name)
-            user = User.objects.create(
-                phone=user.get("phone"),
-                first_name=first_name,
-                last_name=last_name_all,
-                email=user.get("email"),
-                institution=self.context.get("institution"),
-            )
-            student = StudentInfo.objects.create(user=user, **validated_data)
+            user = User.objects.update_or_create(phone=user.get("phone"),
+                                                 default={"first_name": user.get("first_name"),
+                                                          "last_name": user.get("last_name"),
+                                                          "middle_name": user.get(
+                                                              "middle_name"),
+                                                          "email": user.get("email"),
+                                                          "institution": self.context.get(
+                                                              "institution")})
+            student = StudentInfo(user=user, **validated_data)
+
+            created_by = validated_data.get("created_by")
+            for item in created_by.roles.all():
+                if item.title == "Administrator":
+                    student.status = "A"
+
+                elif item.title == "Front Desk Officer":
+                    student.status = "D"
+                else:
+                    pass
+            student.save()
             student.user.username = student.admission_number
             user.set_password(SYSTEM_DEFAULT_PASSWORD)
             student.user.save()
@@ -134,16 +150,20 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         users_obj = self.instance.user
         userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
         if userSerializer.is_valid(raise_exception=True):
-            full_name = userSerializer.validated_data["full_name"].strip().split()
-            first_name, last_name = full_name[0], full_name[1:]
-            userSerializer.save()
-            last_name_all = " ".join(last_name)
-            user_data_obj = User.objects.get(id=self.instance.user.id)
-            user_data_obj.first_name = first_name
-            user_data_obj.last_name = last_name_all
-            user_data_obj.save()
-        super(StudentInfoSerializer, self).update(instance, validated_data)
-        return instance
-
-
-
+            if validated_data.get("photo"):
+                instance.photo = to_internal_value(
+                    validated_data.pop("photo")
+                )
+                instance.save()
+            if validated_data.get("user"):
+                student_data = validated_data.pop("user")
+                user_serializer = UserSerializer(
+                    data=student_data, instance=instance.user
+                )
+                user_serializer.is_valid(raise_exception=True)
+                print(user_serializer.validated_data.get("phone"))
+                user, created = User.objects.update_or_create(phone=user_serializer.validated_data.get("phone"),
+                                                              defaults={**user_serializer.validated_data}
+                                                              )
+                instance.user = user
+            return super(StudentInfoSerializer, self).update(instance, validated_data)
