@@ -140,7 +140,6 @@ class StudentInfoSerializer(serializers.ModelSerializer):
                     "institution": self.context.get("institution"),
                 },
             )
-            print("user", user)
             student = StudentInfo(user=user, **validated_data)
 
             created_by = validated_data.get("created_by")
