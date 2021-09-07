@@ -14,6 +14,8 @@ from common.constant import (
     SELECT_MARITAL_STATUS,
 )
 from general.models import AcademicSession
+from rest_framework.response import Response
+from staff.models import StaffAcademicInfo
 
 
 def return_grade_name_of_value(name):
@@ -122,8 +124,8 @@ def validate_unique_faculty_grade(model, value, institution, instance):
 
 
 def validate_unique_phone(model, phone, institution, instance):
-    if instance:
 
+    if instance:
         if model.objects.filter(
             ~Q(id=instance.user.id), phone=phone, institution=institution
         ).exists():
@@ -218,3 +220,22 @@ def validate_Inquery_unique_email(model, email, institution, instance):
             )
 
     return email
+
+
+def validate_object(model, obj_id, institution):
+    """Function to check if the database object  exist or not"""
+    try:
+        model_obj = model.objects.get(id=obj_id, institution=institution)
+        return model_obj
+    except model.DoesNotExist:
+        raise serializers.ValidationError(f"{model.__name__} doesn't exist")
+
+
+def return_designation_name(staff_id):
+    """
+    function return the designation name
+    """
+    designation = StaffAcademicInfo.objects.values_list(
+        "designation__name", flat=True
+    ).get(staff__id=staff_id)
+    return designation
