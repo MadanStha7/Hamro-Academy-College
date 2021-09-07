@@ -12,10 +12,10 @@ User = get_user_model()
 
 class StaffListSerializer(serializers.ModelSerializer):
     designation_name = serializers.CharField(read_only=True)
-    staff_faculty = serializers.CharField(read_only=True)
     staff_contact_number = serializers.CharField(read_only=True)
     staff_email = serializers.CharField(read_only=True)
     staff_first_name = serializers.CharField(read_only=True)
+    staff_middle_name = serializers.CharField(read_only=True)
     staff_last_name = serializers.CharField(read_only=True)
     gender_name = serializers.CharField(source="get_gender_display", read_only=True)
     religion_name = serializers.CharField(source="get_religion_display", read_only=True)
@@ -37,6 +37,6 @@ class StaffListSerializer(serializers.ModelSerializer):
             "staff_contact_number",
             "staff_email",
             "staff_first_name",
+            "staff_middle_name",
             "staff_last_name",
-            "staff_faculty",
         ]
