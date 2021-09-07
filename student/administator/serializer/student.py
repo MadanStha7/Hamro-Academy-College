@@ -123,6 +123,11 @@ class StudentInfoSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "length of phone number should be more than 7 and less than 14!"
             )
+        if phone:
+            phone = validate_unique_phone(User, phone, self.context.get("institution"), self.instance)
+
+
+
         return user
 
     def create(self, validated_data):
@@ -130,9 +135,9 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            user = User.objects.update_or_create(
+            user, created = User.objects.update_or_create(
                 phone=user.get("phone"),
-                default={
+                defaults={
                     "first_name": user.get("first_name"),
                     "last_name": user.get("last_name"),
                     "middle_name": user.get("middle_name"),
@@ -163,23 +168,19 @@ class StudentInfoSerializer(serializers.ModelSerializer):
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        user_data = validated_data.pop("user")
-        users_obj = self.instance.user
-        userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
-        if userSerializer.is_valid(raise_exception=True):
-            if validated_data.get("photo"):
-                instance.photo = to_internal_value(validated_data.pop("photo"))
-                instance.save()
-            if validated_data.get("user"):
-                student_data = validated_data.pop("user")
-                user_serializer = UserSerializer(
-                    data=student_data, instance=instance.user
-                )
-                user_serializer.is_valid(raise_exception=True)
-                print(user_serializer.validated_data.get("phone"))
-                user, created = User.objects.update_or_create(
-                    phone=user_serializer.validated_data.get("phone"),
-                    defaults={**user_serializer.validated_data},
-                )
-                instance.user = user
-            return super(StudentInfoSerializer, self).update(instance, validated_data)
+        if validated_data.get("photo"):
+            instance.photo = to_internal_value(
+                validated_data.pop("photo")
+            )
+            instance.save()
+        if validated_data.get("user"):
+            student_data = validated_data.pop("user")
+            user_serializer = UserSerializer(
+                data=student_data, instance=instance.user
+            )
+            user_serializer.is_valid(raise_exception=True)
+            user, created = User.objects.update_or_create(phone=user_serializer.validated_data.get("phone"),
+                                                          defaults={**user_serializer.validated_data}
+                                                          )
+            instance.user = user
+        return super(StudentInfoSerializer, self).update(instance, validated_data)

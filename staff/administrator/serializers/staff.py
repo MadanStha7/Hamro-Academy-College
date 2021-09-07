@@ -5,6 +5,7 @@ from common.utils import (
     validate_unique_phone,
     validate_unique_email,
     return_marital_status_value,
+    return_designation_name,
 )
 from academics.models import Faculty, Grade
 from common.utils import to_internal_value
@@ -16,15 +17,13 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-
-    full_name = serializers.CharField(write_only=True)
-    first_name = serializers.CharField(read_only=True)
-    last_name = serializers.CharField(read_only=True)
-
-
     class Meta:
         model = User
-        fields = ("id", "phone", "full_name", "email", "first_name", "last_name")
+        fields = ("id", "phone", "email", "first_name", "middle_name", "last_name")
+
+        extra_kwargs = {
+            "phone": {"validators": []},
+        }
 
 
 class StaffSerializer(serializers.ModelSerializer):
@@ -63,17 +62,13 @@ class StaffSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_user(self, user):
-        """check that faculty name is already exist"""
         phone = user.get("phone")
         email = user.get("email")
+
         # phone number between 10 to 15
         if len(phone) < 10 or len(phone) > 15:
             raise serializers.ValidationError("enter the correct phone number!")
-        # validate unique ph numbers
-        if phone:
-            phone = validate_unique_phone(
-                User, phone, self.context.get("institution"), self.instance
-            )
+
         if email:
             email = validate_unique_email(
                 User, email, self.context.get("institution"), self.instance
@@ -84,19 +79,29 @@ class StaffSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = validated_data.pop("user")
         photo = validated_data.pop("photo")
-        full_name = user["full_name"].strip().split()
-        first_name, last_name = full_name[0], full_name[1:]
-        last_name_all = " ".join(last_name)
-        user = User.objects.create(
+
+        user = User.objects.update_or_create(
             phone=user.get("phone"),
-            first_name=first_name,
-            email=user.get("email"),
-            last_name=last_name_all,
-            institution=self.context.get("institution"),
+            defaults={
+                "first_name": user.get("first_name"),
+                "last_name": user.get("last_name"),
+                "middle_name": user.get("middle_name"),
+                "email": user.get("email"),
+                "institution": self.context.get("institution"),
+            },
         )
-        staff = Staff.objects.create(
-            user=user, photo=to_internal_value(photo), **validated_data
-        )
+        print("user", user)
+        staff = Staff.objects.create(user=user, **validated_data)
+        staff.save()
+
+        # user = User.objects.create(
+        #     first_name=user.get("first_name"),
+        #     middle_name=user.get("middle_name"),
+        #     last_name=user.get("last_name"),
+        #     phone=user.get("phone"),
+        #     email=user.get("email"),
+        #     institution=self.context.get("institution"),
+        # )
         return staff
 
     @transaction.atomic
@@ -105,13 +110,12 @@ class StaffSerializer(serializers.ModelSerializer):
         users_obj = self.instance.user
         userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
         if userSerializer.is_valid(raise_exception=True):
-            full_name = userSerializer.validated_data["full_name"].strip().split()
-            first_name, last_name = full_name[0], full_name[1:]
-            userSerializer.save()
-            last_name_all = " ".join(last_name)
             user_data_obj = User.objects.get(id=self.instance.user.id)
-            user_data_obj.first_name = first_name
-            user_data_obj.last_name = last_name_all
+            user_data_obj.first_name = user_data.get("first_name")
+            user_data_obj.middle_name = user_data.get("middle_name")
+            user_data_obj.last_name = user_data.get("last_name")
+            user_data_obj.email = user_data.get("email")
+            user_data_obj.phone = user_data.get("phone")
             user_data_obj.save()
         super(StaffSerializer, self).update(instance, validated_data)
         return instance
@@ -119,10 +123,6 @@ class StaffSerializer(serializers.ModelSerializer):
 
 class StaffListSerializer(serializers.ModelSerializer):
     designation__name = serializers.CharField(read_only=True)
-    staff_contact_number = serializers.CharField(read_only=True)
-    staff_email = serializers.CharField(read_only=True)
-    staff_first_name = serializers.CharField(read_only=True)
-    staff_last_name = serializers.CharField(read_only=True)
     gender_name = serializers.CharField(source="get_gender_display", read_only=True)
     religion_name = serializers.CharField(source="get_religion_display", read_only=True)
     blood_group_name = serializers.CharField(
@@ -133,6 +133,7 @@ class StaffListSerializer(serializers.ModelSerializer):
         res = super().to_representation(instance)
         res["user"] = UserSerializer(instance.user).data
         res["marital_status_value"] = return_marital_status_value(res["marital_status"])
+        res["designation"] = return_designation_name(res["id"])
         return res
 
     class Meta:
@@ -146,10 +147,6 @@ class StaffListSerializer(serializers.ModelSerializer):
             "religion_name",
             "designation__name",
             "gender_name",
-            "staff_contact_number",
-            "staff_email",
-            "staff_first_name",
-            "staff_last_name",
             "user",
             "marital_status",
         ]

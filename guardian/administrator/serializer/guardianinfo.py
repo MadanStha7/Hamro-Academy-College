@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from common.utils import validate_unique_phone, to_internal_value
 from guardian.models import StudentGuardianInfo
-from staff.administrator.serializers.staff import UserSerializer
+from student.administator.serializer.student import UserSerializer
 
 User = get_user_model()
 
@@ -45,17 +45,19 @@ class GuardianInfoSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             photo = validated_data.pop("photo")
             user = validated_data.pop("user")
-            all_name = user["full_name"].strip().split()
-            first_name, last_name = all_name[0], all_name[1:]
-            last_name_all = " ".join(last_name)
-            user = User.objects.create(
+            user, created = User.objects.update_or_create(
                 phone=user.get("phone"),
-                first_name=first_name,
-                last_name=last_name_all,
-                email=user.get("email"),
-                institution=self.context.get("institution"),
+                defaults={
+                    "first_name": user.get("first_name"),
+                    "last_name": user.get("last_name"),
+                    "middle_name": user.get("middle_name"),
+                    "email": user.get("email"),
+                    "institution": self.context.get("institution"),
+                },
             )
             guardian = StudentGuardianInfo.objects.create(user=user, **validated_data)
+            guardian.save()
+
             if photo:
                 guardian.photo = to_internal_value(photo)
                 guardian.save()
