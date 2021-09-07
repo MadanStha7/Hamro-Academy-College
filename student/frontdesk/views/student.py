@@ -30,14 +30,16 @@ class StudentListAPIView(ListAPIView):
         queryset = queryset.annotate(
             phone=F("user__phone"),
             student_first_name=F("user__first_name"),
+            student_middle_name=F("user__middle_name"),
             student_last_name=F("user__last_name"),
+            student_email=F("user__email"),
+            student_phone=F("user__phone"),
             faculty=F("student_academic_detail__faculty__name"),
             section=F("student_academic_detail__section__name"),
             grade=F("student_academic_detail__grade__name"),
             guardian_first_name=F("guardian_detail__user__first_name"),
             guardian_last_name=F("guardian_detail__user__last_name"),
             relation_name=F("guardian_detail__relation"),
-            guardian_phone_number=F("guardian_detail__phone"),
             email=F("user__email"),
         )
         return queryset

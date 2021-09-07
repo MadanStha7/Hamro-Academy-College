@@ -34,6 +34,7 @@ class ShiftSerializer(serializers.ModelSerializer):
     section_name = serializers.CharField(read_only=True)
     grade_name = serializers.CharField(read_only=True)
     subject_name = serializers.CharField(read_only=True)
+    faculty_name = serializers.CharField(read_only=True)
     day_name = serializers.CharField(source="get_day_display", read_only=True)
 
     class Meta:
@@ -47,7 +48,8 @@ class ShiftSerializer(serializers.ModelSerializer):
             "start_time",
             "end_time",
             "subject_name",
-            "day_name"
+            "day_name",
+            "faculty_name"
         ]
 
 
