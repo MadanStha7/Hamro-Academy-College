@@ -2,6 +2,7 @@ from guardian.models import StudentGuardianInfo
 from student.models import StudentAcademicDetail, StudentInfo
 from staff.administrator.serializers.staff import UserSerializer
 from rest_framework import serializers
+from student.administator.serializer.previous_academic import PreviousAcademicSerializer
 
 
 class StudentAcademicSerializer(serializers.ModelSerializer):
@@ -61,6 +62,8 @@ class StudentInfoSerializer(serializers.ModelSerializer):
         read_only=True, required=False, allow_null=True
     )
     student_academic_detail = StudentAcademicSerializer(many=True, read_only=True)
+    previous_academic_detail = PreviousAcademicSerializer(many=True, read_only=True)
+
     guardian_detail = GuardianInfoSerializer(read_only=True)
     category_name = serializers.CharField(source="student_category.name")
 
@@ -96,4 +99,5 @@ class StudentInfoSerializer(serializers.ModelSerializer):
             "guardian_detail",
             "disable",
             "student_academic_detail",
+            "previous_academic_detail",
         ]
