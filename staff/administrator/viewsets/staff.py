@@ -48,6 +48,14 @@ class StaffViewSet(CommonInfoViewSet):
         )
         return queryset
 
+    def perform_create(self, serializer):
+        photo = self.request.data.get("photo")
+        serializer.save(
+            photo=photo,
+            created_by=self.request.user,
+            institution=self.request.institution,
+        )
+
     def list(self, request):
         """api to get list of serializer of staff"""
         queryset = Staff.objects.filter(institution=self.request.institution)
