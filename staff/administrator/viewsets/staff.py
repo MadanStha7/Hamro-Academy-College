@@ -52,13 +52,6 @@ class StaffViewSet(CommonInfoViewSet):
         """api to get list of serializer of staff"""
         queryset = Staff.objects.filter(institution=self.request.institution)
         queryset = self.filter_queryset(queryset)
-        queryset = queryset.annotate(
-            designation__name=F("designation__name"),
-            staff_contact_number=F("user__phone"),
-            staff_email=F("user__email"),
-            staff_first_name=F("user__first_name"),
-            staff_last_name=F("user__last_name"),
-        )
         page = self.paginate_queryset(queryset)
         serializer = StaffListSerializer(page, many=True)
         return self.get_paginated_response(serializer.data)

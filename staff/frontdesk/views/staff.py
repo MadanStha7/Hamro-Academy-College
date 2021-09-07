@@ -32,12 +32,12 @@ class StaffListAPIView(ListAPIView):
     def get_queryset(self):
         queryset = Staff.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(
-            designation_name=F("designation__name"),
             staff_contact_number=F("user__phone"),
             staff_email=F("user__email"),
             staff_first_name=F("user__first_name"),
+            staff_middle__name=F("user__middle_name"),
             staff_last_name=F("user__last_name"),
-            staff_faculty=F("staff_academic_info__faculty__name"),
+            designation_name=F("staff_academic_info__designation__name"),
         )
         return queryset
 
