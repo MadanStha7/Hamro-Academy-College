@@ -69,6 +69,11 @@ class StaffSerializer(serializers.ModelSerializer):
         if len(phone) < 10 or len(phone) > 15:
             raise serializers.ValidationError("enter the correct phone number!")
 
+        if phone:
+            phone = validate_unique_phone(
+                User, phone, self.context.get("institution"), self.instance
+            )
+
         if email:
             email = validate_unique_email(
                 User, email, self.context.get("institution"), self.instance
@@ -79,8 +84,9 @@ class StaffSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = validated_data.pop("user")
         photo = validated_data.pop("photo")
+        print("photo", photo)
 
-        user = User.objects.update_or_create(
+        user, created = User.objects.update_or_create(
             phone=user.get("phone"),
             defaults={
                 "first_name": user.get("first_name"),
@@ -91,34 +97,28 @@ class StaffSerializer(serializers.ModelSerializer):
             },
         )
         print("user", user)
-        staff = Staff.objects.create(user=user, **validated_data)
+        staff = Staff(user=user, **validated_data)
         staff.save()
-
-        # user = User.objects.create(
-        #     first_name=user.get("first_name"),
-        #     middle_name=user.get("middle_name"),
-        #     last_name=user.get("last_name"),
-        #     phone=user.get("phone"),
-        #     email=user.get("email"),
-        #     institution=self.context.get("institution"),
-        # )
+        if photo:
+            staff.photo = to_internal_value(photo)
+            staff.save()
         return staff
 
     @transaction.atomic
     def update(self, instance, validated_data):
-        user_data = validated_data.pop("user")
-        users_obj = self.instance.user
-        userSerializer = UserSerializer(users_obj, data=user_data, partial=True)
-        if userSerializer.is_valid(raise_exception=True):
-            user_data_obj = User.objects.get(id=self.instance.user.id)
-            user_data_obj.first_name = user_data.get("first_name")
-            user_data_obj.middle_name = user_data.get("middle_name")
-            user_data_obj.last_name = user_data.get("last_name")
-            user_data_obj.email = user_data.get("email")
-            user_data_obj.phone = user_data.get("phone")
-            user_data_obj.save()
-        super(StaffSerializer, self).update(instance, validated_data)
-        return instance
+        if validated_data.get("photo"):
+            instance.photo = to_internal_value(validated_data.pop("photo"))
+            instance.save()
+        if validated_data.get("user"):
+            staff_data = validated_data.pop("user")
+            user_serializer = UserSerializer(data=staff_data, instance=instance.user)
+            user_serializer.is_valid(raise_exception=True)
+            user, created = User.objects.update_or_create(
+                phone=user_serializer.validated_data.get("phone"),
+                defaults={**user_serializer.validated_data},
+            )
+            instance.user = user
+        return super(StaffSerializer, self).update(instance, validated_data)
 
 
 class StaffListSerializer(serializers.ModelSerializer):
