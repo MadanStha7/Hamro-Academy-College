@@ -6,6 +6,7 @@ from common.utils import (
     validate_unique_email,
     return_marital_status_value,
     return_designation_name,
+    return_gender_value,
 )
 from academics.models import Faculty, Grade
 from common.utils import to_internal_value
@@ -17,6 +18,10 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(required=True)
+    middle_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+
     class Meta:
         model = User
         fields = ("id", "phone", "email", "first_name", "middle_name", "last_name")
@@ -27,9 +32,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StaffSerializer(serializers.ModelSerializer):
-    photo = serializers.CharField()
     designation__name = serializers.CharField(read_only=True)
     user = UserSerializer()
+    photo = serializers.SerializerMethodField(
+        read_only=True, required=False, allow_null=True
+    )
+
+    def get_photo(self, obj):
+        return obj.photo.url if obj.photo else None
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
@@ -53,6 +63,7 @@ class StaffSerializer(serializers.ModelSerializer):
             "spouse_name",
             "designation__name",
             "marital_status",
+            "gender",
         ]
 
     def validate(self, attrs):
@@ -84,8 +95,6 @@ class StaffSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = validated_data.pop("user")
         photo = validated_data.pop("photo")
-        print("photo", photo)
-
         user, created = User.objects.update_or_create(
             phone=user.get("phone"),
             defaults={
@@ -96,7 +105,6 @@ class StaffSerializer(serializers.ModelSerializer):
                 "institution": self.context.get("institution"),
             },
         )
-        print("user", user)
         staff = Staff(user=user, **validated_data)
         staff.save()
         if photo:
@@ -133,6 +141,7 @@ class StaffListSerializer(serializers.ModelSerializer):
         res = super().to_representation(instance)
         res["user"] = UserSerializer(instance.user).data
         res["marital_status_value"] = return_marital_status_value(res["marital_status"])
+        res["gender_value"] = return_gender_value(res["gender"])
         res["designation"] = return_designation_name(res["id"])
         return res
 
@@ -149,6 +158,7 @@ class StaffListSerializer(serializers.ModelSerializer):
             "gender_name",
             "user",
             "marital_status",
+            "gender",
         ]
 
 
