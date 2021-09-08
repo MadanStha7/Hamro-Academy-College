@@ -17,20 +17,13 @@ class ProfileSerializer(serializers.ModelSerializer):
     """
 
     user = UserSerializer(read_only=True)
-    documents = DocumentSerializer(read_only=True, many=True)
     designation_display = serializers.CharField(
         source="designation.name", read_only=True
     )
+    staff_academic_info_details = StaffAcademicInfoSerializer(read_only=True)
 
     def to_representation(self, instance):
         res = super().to_representation(instance)
-        try:
-            staff_academic_info = StaffAcademicInfo(staff=instance.id)
-            res["staff_academic_info"] = StaffAcademicInfoSerializer(
-                staff_academic_info
-            ).data
-        except StaffAcademicInfo.DoesNotExist:
-            pass
         res["marital_status"] = return_marital_status_value(res["marital_status"])
         return res
 
@@ -46,5 +39,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             "address",
             "dob",
             "marital_status",
-            "documents",
+            "staff_academic_info_details",
         ]
