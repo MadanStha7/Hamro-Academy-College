@@ -2,10 +2,13 @@ from rest_framework import viewsets
 from staff.models import Document, Staff
 from staff.administrator.serializers.document import DocumentSerializer
 from common.administrator.viewset import CommonInfoViewSet
+from permissions.administrator_or_teacher_or_frontdesk import (
+    AdministratorOrTeacherOrFrontDeskOPermission,
+)
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.serializers import ValidationError
-from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 
@@ -41,18 +44,28 @@ class StaffDocumentViewSet(CommonInfoViewSet):
             serializer.data, status=status.HTTP_201_CREATED, headers=headers
         )
 
-    @action(detail=False, methods=["get"], url_path="details")
+    @action(
+        permission_classes=(
+            IsAuthenticated,
+            AdministratorOrTeacherOrFrontDeskOPermission,
+        ),
+        detail=False,
+        methods=["get"],
+        url_path="details",
+    )
     def staff_acdemic_info(self, request, *args, **kwargs):
         staff = self.request.query_params.get("staff", None)
         if staff:
             staff_obj = get_object_or_404(
                 Staff, id=staff, institution=self.request.institution
-            ).id
+            )
             document_data = Document.objects.filter(
-                staff__id=staff_obj, institution=self.request.institution
+                staff=staff_obj, institution=self.request.institution
             )
             if document_data:
                 serializer = DocumentSerializer(document_data, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                raise ValidationError({"error": ["staff has no documents"]})
         else:
             raise ValidationError({"error": ["Staff id is required"]})
