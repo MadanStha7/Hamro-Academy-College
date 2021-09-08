@@ -76,6 +76,7 @@ class Staff(CommonInfo):
     address = models.TextField()
     dob = models.DateField()
     marital_status = models.CharField(max_length=1, choices=SELECT_MARITAL_STATUS)
+    gender = models.CharField(max_length=1, choices=SELECT_GENDER, null=True)
     spouse_name = models.CharField(max_length=30, null=True, blank=True)
 
     def __str__(self):
@@ -93,11 +94,14 @@ class StaffAcademicInfo(CommonInfo):
     """
 
     staff = models.OneToOneField(
-        Staff, related_name="staff_academic_info", on_delete=models.CASCADE
+        Staff, related_name="staff_academic_info_details", on_delete=models.CASCADE
     )
     department = models.ManyToManyField(Department, related_name="staff_academic_info")
     designation = models.ForeignKey(
-        Designation, related_name="staff_academic_info", on_delete=models.CASCADE
+        Designation,
+        related_name="staff_academic_info",
+        on_delete=models.CASCADE,
+        null=True,
     )
     previous_academic_details = models.BooleanField(default=False)
     previous_college_name = models.CharField(max_length=40, null=True, blank=True)
