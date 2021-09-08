@@ -35,10 +35,10 @@ class InquiryView(viewsets.ViewSet):
 
         queryset = Inquiry.objects.filter(institution=self.request.institution)
         queryset = queryset.annotate(faculty_name=F("faculty__name"))
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+        paginator = CustomPageSizePagination()
+        result_page = paginator.paginate_queryset(queryset, self.request)
+        serializer = InquiryListSerializer(result_page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, pk=None):
         queryset = Inquiry.objects.annotate(faculty_name=F("faculty__name")).get(
