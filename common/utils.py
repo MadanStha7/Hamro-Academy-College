@@ -235,7 +235,10 @@ def return_designation_name(staff_id):
     """
     function return the designation name
     """
-    designation = StaffAcademicInfo.objects.values_list(
-        "designation__name", flat=True
-    ).get(staff__id=staff_id)
-    return designation
+    try:
+        designation = StaffAcademicInfo.objects.values_list(
+            "designation__name", flat=True
+        ).get(staff__id=staff_id)
+        return designation
+    except StaffAcademicInfo.DoesNotExist:
+        designation = None

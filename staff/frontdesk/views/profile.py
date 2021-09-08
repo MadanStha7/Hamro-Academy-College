@@ -17,7 +17,6 @@ class FrontDeskProfileView(RetrieveUpdateAPIView):
 
     def get_object(self):
         try:
-            print("request user", self.request.user)
             staff = Staff.objects.get(user__id=self.request.user.id)
             return staff
         except Staff.DoesNotExist:
