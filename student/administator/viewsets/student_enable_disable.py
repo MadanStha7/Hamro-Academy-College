@@ -17,7 +17,7 @@ from rest_framework.response import Response
 
 
 class StudentDisableAPIView(APIView):
-    """Api to display a disable Student list in adminstrator"""
+    """Api to display a disable Student list in administrator"""
 
     serializer_class = StudentListInfoSerializer
     queryset = StudentInfo.objects.none()
