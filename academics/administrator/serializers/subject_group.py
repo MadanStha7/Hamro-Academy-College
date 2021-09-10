@@ -14,6 +14,7 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
     )
     subject = SubjectSerializer(read_only=True, many=True)
     section = SectionSerializer(read_only=True, many=True)
+    grade_name = serializers.CharField(read_only=True)
 
     class Meta:
         model = SubjectGroup
@@ -26,6 +27,7 @@ class SubjectGroupSerializer(serializers.ModelSerializer):
             "section",
             "section_id",
             "grade",
+            "grade_name",
             "faculty",
             "description",
             "created_by",

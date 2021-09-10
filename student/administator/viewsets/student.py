@@ -62,9 +62,7 @@ class StudentInfoViewSet(CommonInfoViewSet):
             grade=F("student_academic_detail__grade__name"),
             guardian_first_name=F("guardian_detail__user__first_name"),
             guardian_last_name=F("guardian_detail__user__last_name"),
-            relation=F("guardian_detail__relation"),
-            guardian_phone_number=F("guardian_detail__phone"),
-            email=F("user__email"),
+            relation=F("guardian_detail__relation")
         )
         serializer = StudentListInfoSerializer(result, many=True)
         return self.get_paginated_response(serializer.data)
