@@ -77,8 +77,11 @@ class StaffViewSet(CommonInfoViewSet):
             if user:
                 user_id = get_object_or_404(User, id=user)
                 if user_id:
+                    # remove the existing roles
+                    user_remove = User(id=user_id.id).roles.clear()
                     for role in roles:
-                        user = User(id=user_id.id).roles.add(role)
+                        # adding a new roles
+                        user_add = User(id=user_id.id).roles.add(role)
                         user = User.objects.get(id=user_id.id)
                         data = StaffAssignSerialzer(user)
                     return Response(data.data, status=status.HTTP_200_OK)
