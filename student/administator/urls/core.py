@@ -3,6 +3,7 @@ from .category import urlpatterns as category_urls
 from .academic import urlpatterns as student_academic_urls
 from .previous_academic import urlpatterns as previous_academic_urls
 from .document import urlpatterns as document_urls
+from .student_enable_disable import urlpatterns as student_enable_disable_urls
 
 
 urlpatterns = (
@@ -11,4 +12,5 @@ urlpatterns = (
     + student_academic_urls
     + previous_academic_urls
     + document_urls
+    + student_enable_disable_urls
 )

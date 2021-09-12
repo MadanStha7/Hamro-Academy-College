@@ -21,10 +21,12 @@ class AuthTestCase(CommonTestCase):
         token = self.test_get_token()
         return token
 
-    def change_role(self, role):
+    def change_role(self):
+        role = self.get_administrator_group()
         self.get_created_by().roles.add(role)
         self.get_created_by().save()
 
-    def student_change_role(self, role):
+    def student_change_role(self):
+        role = self.get_student_group()
         self.get_created_by().roles.add(role)
         self.get_created_by().save()
