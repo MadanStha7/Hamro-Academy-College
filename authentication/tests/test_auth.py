@@ -30,3 +30,8 @@ class AuthTestCase(CommonTestCase):
         role = self.get_student_group()
         self.get_created_by().roles.add(role)
         self.get_created_by().save()
+
+    def teacher_change_role(self):
+        role = self.get_teacher_group()
+        self.get_created_by().roles.add(role)
+        self.get_created_by().save()

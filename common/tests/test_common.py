@@ -10,6 +10,7 @@ User = get_user_model()
 class CommonTestCase(APITestCase):
     ADMINISTRATOR_URL = "/api/v1/"
     STUDENT_URL = "/api/v1/student/"
+    TEACHER_URL = "/api/v1/teacher/"
 
     @staticmethod
     def setup_common() -> None:
@@ -23,9 +24,11 @@ class CommonTestCase(APITestCase):
         user.set_password("demo123")
         user.save()
         group = Group.objects.create(name="new")
-        group1= Group.objects.create(name="new1")
+        group1 = Group.objects.create(name="new1")
+        group2 = Group.objects.create(name="new2")
         Role.objects.create(title="Administrator", group=group, institution=institution)
         Role.objects.create(title="Student", group=group1, institution=institution)
+        Role.objects.create(title="Teacher", group=group2, institution=institution)
 
     @staticmethod
     def get_institution():
@@ -44,3 +47,7 @@ class CommonTestCase(APITestCase):
     @staticmethod
     def get_student_group():
         return Role.objects.get(title="Student")
+
+    @staticmethod
+    def get_teacher_group():
+        return Role.objects.get(title="Teacher")
