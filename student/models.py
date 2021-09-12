@@ -8,7 +8,7 @@ from common.constant import (
     SELECT_GENDER,
     SELECT_BLOOD_GROUP,
     SELECT_RELIGION,
-    SELECT_STATUS
+    SELECT_STATUS,
 )
 from general.models import AcademicSession
 from guardian.models import StudentGuardianInfo
@@ -54,9 +54,9 @@ class StudentInfo(CommonInfo):
         max_length=1, choices=SELECT_RELIGION, blank=True, null=True
     )
     gender = models.CharField(max_length=1, choices=SELECT_GENDER)
-    photo = models.ImageField(upload_to="student-photos/")
+    photo = models.ImageField(upload_to="student-photos/", blank=True, null=True)
     disable = models.BooleanField(default=False, db_index=True)
-    status = models.CharField(max_length=1, choices= SELECT_STATUS)
+    status = models.CharField(max_length=1, choices=SELECT_STATUS)
 
     def __str__(self):
         return f"{self.user.get_full_name()}"

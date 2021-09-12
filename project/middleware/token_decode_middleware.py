@@ -17,6 +17,6 @@ class HandleJWTokenMiddleware(MiddlewareMixin):
         return None
 
     def process_exception(self, request, exception):
-        if str(exception) == "'Request' object has no attribute 'general_info'":
+        if str(exception) == "'Request' object has no attribute 'institution'":
             return HttpResponse("requires JWT token to access this API")
         return None
