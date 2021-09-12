@@ -42,9 +42,7 @@ def validate_unique_name(model, value, institution, instance):
             )
     else:
         if model.objects.filter(name=value.title(), institution=institution).exists():
-            raise ValidationError(
-                {"message": [f"{model.__name__} with this name already exists"]}
-            )
+            raise ValidationError([f"{model.__name__} with this name already exists"])
 
     return value
 
