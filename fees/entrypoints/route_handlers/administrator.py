@@ -1,7 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import F
 from rest_framework.serializers import ValidationError
-from rest_framework import filters, serializers
+from rest_framework import exceptions, filters, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -18,7 +18,7 @@ from fees.service_layer.serializers.fee_setup import (
 from permissions import administrator
 from fees.orm import models as orm
 from fees.utils.filter import FeeFilter, FeeConfigFilter
-from fees.domain import commands
+from fees.domain import commands, exceptions
 from fees.orm.models import FeeConfig
 
 
@@ -104,10 +104,21 @@ class StudentFeeCollectionView(APIView):
     def post(self, request, *args, **kwargs):
         student_academic = request.query_params.get("student_academic")
         if student_academic:
-            serializer = StudentFeeCollectSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            cmd = commands.CollectStudentFee(**request.data)
-            collect_fee = handlers.collect_student_fee(
-                cmd=cmd, student_academic=student_academic
-            )
-            print(collect_fee)
+            try:
+                serializer = StudentFeeCollectSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
+                cmd = commands.CollectStudentFee(**request.data)
+                handlers.collect_student_fee(
+                    cmd=cmd,
+                    student_academic=student_academic,
+                    institution=self.request.user.institution,
+                    created_by=self.request.user,
+                )
+                return Response(
+                    {"message": ["Student fee collected successfully"]},
+                    status=status.HTTP_201_CREATED,
+                )
+            except exceptions.DuplicateFeeConfigPaidException as e:
+                return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+            except exceptions.PaidAmountExceedException as e:
+                return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)

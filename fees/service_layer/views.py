@@ -78,33 +78,45 @@ def get_student_fee_collection(student_academic: UUID, institution: UUID):
     ).annotate(fee_type_name=F("fee_type__name"))
 
     serializer = FeeConfigSerializer(fee_configs, many=True)
-    paid_fee_type = StudentPaidFeeSetup.objects.filter(
-        fee_collection__student_academic=student_academic
-    ).values("fee_type__id", "due_amount")
+    paid_fee_type = (
+        StudentPaidFeeSetup.objects.filter(
+            fee_collection__student_academic=student_academic
+        )
+        .order_by("fee_config__id")
+        .values("fee_config__id", "due_amount")
+    )
+    print(paid_fee_type)
     for data in serializer.data:
         for paid_fee in paid_fee_type:
-            if paid_fee.get("fee_type__id") == data.get("fee_type"):
+            if str(paid_fee.get("fee_config__id")) == data.get("id"):
                 data["amount"] = paid_fee.get("due_amount")
-    return serializer.data
+    data = [data for data in serializer.data if float(data.get("amount")) > 0]
+    return data
 
 
 def get_student_fee_collection_detail(
     student_academic: UUID,
     institution: UUID,
     fine_id: typing.List[UUID],
-    fee_types: typing.List[typing.Dict],
+    fee_configs: typing.List[typing.Dict],
 ):
     """
     views to return the data, that is needed for student
     fee collection this includes, previous_collected_fees, applicable_fines
     """
-    collected_student_fees = StudentPaidFeeSetup.objects.filter(
-        fee_collection__student_academic__id=student_academic, institution=institution
-    ).values("fee_type__id", "paid_amount", "due_amount")
+    collected_student_fees = (
+        StudentPaidFeeSetup.objects.filter(
+            fee_collection__student_academic__id=student_academic,
+            institution=institution,
+        )
+        .order_by("-created_on")
+        .values("fee_config__id", "paid_amount", "due_amount")
+    )
     applied_fines = FineType.objects.filter(
         institution=institution, id__in=fine_id
     ).values("id", "fine_mode", "fine_amount")
+    fee_config_ids = [fee_config.get("fee_config") for fee_config in fee_configs]
     collected_fee_configs = FeeConfig.objects.filter(
-        institution=institution, id__in=fee_types, is_active=True
+        institution=institution, id__in=fee_config_ids, is_active=True
     ).values("id", "amount")
     return collected_student_fees, applied_fines, collected_fee_configs

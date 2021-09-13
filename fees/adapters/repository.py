@@ -6,6 +6,7 @@ from core import models as core_orm
 from user import models as user_orm
 from academics import models as academic_orm
 from fees.domain import models
+from student import models as student_orm
 
 
 class FeeSetupRepository:
@@ -93,6 +94,37 @@ class FeeConfigRepository:
         return fee_config_
 
     def collect_student_fee_config(
-        self, student_academic: UUID, cmd, total_fee_amount_to_pay, total_paid_amount
+        self, model: models.FeeCollect, institution, created_by
     ):
-        pass
+        fee_collection = orm.FeeCollection.objects.create(
+            student_academic=student_orm.StudentAcademicDetail(
+                id=model.student_academic
+            ),
+            total_paid_amount=model.total_paid_amount,
+            total_amount_to_pay=model.total_amount_to_pay,
+            discount_in=model.discount_in,
+            discount=model.discount,
+            payment_method=model.payment_method,
+            institution=institution,
+            narration=model.narration,
+            issued_date=model.issued_date,
+            created_by=created_by,
+        )
+        if model.fine_id:
+            fee_collection.fine.set(model.fine_id)
+            fee_collection.save()
+        bulk_paid_fee_config = []
+        for fee_config in model.fee_configs:
+            fee_collect = orm.StudentPaidFeeSetup(
+                fee_collection=fee_collection,
+                fee_config=orm.FeeConfig(id=fee_config.get("fee_config")),
+                paid_amount=fee_config.get("paid_amount"),
+                due_amount=fee_config.get("due_amount")
+                if fee_config.get("due_amount")
+                else 0,
+                institution=institution,
+                created_by=created_by,
+            )
+            bulk_paid_fee_config.append(fee_collect)
+
+        orm.StudentPaidFeeSetup.objects.bulk_create(bulk_paid_fee_config)
