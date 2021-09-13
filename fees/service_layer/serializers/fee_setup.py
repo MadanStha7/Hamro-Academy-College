@@ -65,9 +65,12 @@ class FeeConfigSerializer(serializers.ModelSerializer):
         return value
 
 
-class CollectFeeConfigSerializer(serializers.ModelSerializer):
+class CollectFeeConfigSerializer(serializers.Serializer):
     fee_config = serializers.UUIDField()
     paid_amount = serializers.FloatField()
+
+    class Meta:
+        fields = ("fee_config", "paid_amount")
 
     def validate_paid_amount(self, value):
         if value < 0:
@@ -102,7 +105,7 @@ class StudentFeeCollectSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs.get("fee_configs"):
             serializer = CollectFeeConfigSerializer(
-                data=attrs.get("fee_config"), many=True
+                data=attrs.get("fee_configs"), many=True
             )
             serializer.is_valid(raise_exception=True)
         else:

@@ -51,18 +51,24 @@ def activate_deactivate_fee_config(cmd: commands.ActivateDeactivateFeeConfig):
     return fee_config
 
 
-def collect_student_fee(cmd: commands.CollectStudentFee, student_academic, institution):
+def collect_student_fee(
+    cmd: commands.CollectStudentFee, student_academic, institution, created_by
+):
     (
         collected_student_fees,
         applied_fines,
         collected_fee_configs,
     ) = views.get_student_fee_collection_detail(
-        student_academic, institution, cmd.fine_id, cmd.fee_types
+        student_academic, institution, cmd.fine_id, cmd.fee_configs
     )
-    models.student_fee_collect_factory(
+    repository = FeeConfigRepository()
+    model = models.student_fee_collect_factory(
         student_academic,
         cmd,
         collected_student_fees,
         applied_fines,
         collected_fee_configs,
     )
+    print(model)
+    with transaction.atomic():
+        repository.collect_student_fee_config(model, institution, created_by)

@@ -18,7 +18,7 @@ class AddFeeSetup(Command):
     fee_type: str
     due_date: typing.Optional[datetime.date] = None
     due_day: typing.Optional[int] = None
-    due_type: typing.Optional[int] = None
+    due_type: typing.Optional[str] = None
     description: typing.Optional[str] = None
 
 
@@ -49,3 +49,4 @@ class CollectStudentFee(Command):
     discount_in: typing.Optional[str] = None
     discount: typing.Optional[decimal.Decimal] = None
     narration: typing.Optional[str] = None
+    issued_date: typing.Optional[datetime.date] = datetime.date.today()
