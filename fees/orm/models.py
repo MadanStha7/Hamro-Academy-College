@@ -17,7 +17,7 @@ class FeeSetup(CommonInfo):
     faculty = models.ManyToManyField(Faculty, related_name="fee_setup")
     grade = models.ManyToManyField(Grade, related_name="fee_setup")
     due_date = models.DateField(blank=True, null=True)
-    fee_type = models.CharField(choices=FEE_TYPE, max_length=31)
+    fee_type = models.CharField(choices=FEE_TYPE, max_length=31, blank=True, null=True)
     due_day = models.IntegerField(default=0, blank=True, null=True)
     due_type = models.CharField(choices=DUE_TYPE, max_length=7, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -160,11 +160,13 @@ class StudentPaidFeeSetup(CommonInfo):
         on_delete=models.CASCADE,
         help_text="Master fee collection",
     )
-    fee_type = models.ForeignKey(
-        FeeSetup,
+    fee_config = models.ForeignKey(
+        FeeConfig,
         related_name="student_paid_fee_setup",
         on_delete=models.PROTECT,
-        help_text="Type of fee student paid",
+        help_text="Type of fee config student paid",
+        blank=True,
+        null=True
     )
     paid_amount = models.DecimalField(max_digits=20, decimal_places=2)
     due_amount = models.DecimalField(max_digits=20, decimal_places=2)
