@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404
 from student.administator.serializer.student_enable_disable import (
     StudentListInfoSerializer,
 )
+from rest_framework import status
 from permissions.administrator import AdministratorPermission
 from student.models import StudentInfo
 from student.administator.custom_fiter import StudentFilter
@@ -14,6 +15,7 @@ from rest_framework import filters
 from rest_framework.serializers import ValidationError
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from project.custom.pagination import CustomPageSizePagination
 
 
 class StudentDisableAPIView(APIView):
@@ -30,6 +32,27 @@ class StudentDisableAPIView(APIView):
     ]
     filter_class = StudentFilter
     permission_classes = (IsAuthenticated, AdministratorPermission)
+    pagination_class = CustomPageSizePagination
+
+    @property
+    def paginator(self):
+        if not hasattr(self, "_paginator"):
+            if self.pagination_class is None:
+                self._paginator = None
+            else:
+                self._paginator = self.pagination_class()
+        else:
+            pass
+        return self._paginator
+
+    def paginate_queryset(self, queryset):
+        if self.paginator is None:
+            return None
+        return self.paginator.paginate_queryset(queryset, self.request, view=self)
+
+    def get_paginated_response(self, data):
+        assert self.paginator is not None
+        return self.paginator.get_paginated_response(data)
 
     def get(self, request, format=None):
         queryset = StudentInfo.objects.filter(
@@ -50,8 +73,14 @@ class StudentDisableAPIView(APIView):
             relation_name=F("guardian_detail__relation"),
             email=F("user__email"),
         )
-        serializer = StudentListInfoSerializer(queryset, many=True)
-        return Response(serializer.data)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_paginated_response(
+                StudentListInfoSerializer(page, many=True).data
+            )
+        else:
+            serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, format=None):
         with transaction.atomic():
