@@ -32,21 +32,26 @@ class StudentInfoViewSet(CommonInfoViewSet):
     serializer_class = StudentInfoSerializer
     permission_classes = (IsAuthenticated, AdministratorOrFrontDeskOPermission)
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    search_fields = ["user__first_name", "user__last_name", "guardian_detail__user__first_name",
-                     "guardian_detail__user__last_name"]
+    search_fields = [
+        "user__first_name",
+        "user__last_name",
+        "guardian_detail__user__first_name",
+        "guardian_detail__user__last_name",
+    ]
     filter_class = StudentFilter
 
     def get_queryset(self):
         queryset = StudentInfo.objects.filter(
-            institution=self.request.institution
-        ).annotate(student_first_name=F("user__first_name"),
-                   student_middle_name=F("user__middle_name"),
-                   student_last_name=F("user__last_name"),)
+            institution=self.request.institution, disable=False
+        ).annotate(
+            student_first_name=F("user__first_name"),
+            student_middle_name=F("user__middle_name"),
+            student_last_name=F("user__last_name"),
+        )
         return queryset
 
     def list(self, request, *args, **kwargs):
         """api to get list of serializer of student"""
-        institution = self.request.institution
         queryset = self.get_queryset()
         queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
@@ -63,7 +68,6 @@ class StudentInfoViewSet(CommonInfoViewSet):
             guardian_first_name=F("guardian_detail__user__first_name"),
             guardian_last_name=F("guardian_detail__user__last_name"),
             relation=F("guardian_detail__relation"),
-            guardian_phone_number=F("guardian_detail__phone"),
             email=F("user__email"),
         )
         serializer = StudentListInfoSerializer(result, many=True)
@@ -80,8 +84,8 @@ class StudentInfoViewSet(CommonInfoViewSet):
     @transaction.atomic()
     def destroy(self, request, *args, **kwargs):
         """
-            Delete student
-            """
+        Delete student
+        """
         instance = self.get_object()
         obj = self.get_object().id
         instance.user.delete()
@@ -90,5 +94,3 @@ class StudentInfoViewSet(CommonInfoViewSet):
             {"message": f"object {obj} successfully deleted"},
             status=status.HTTP_204_NO_CONTENT,
         )
-
-
