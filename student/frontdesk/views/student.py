@@ -26,7 +26,9 @@ class StudentListAPIView(ListAPIView):
     permission_classes = (IsAuthenticated, FrontDeskPermission)
 
     def get_queryset(self):
-        queryset = StudentInfo.objects.filter(institution=self.request.institution)
+        queryset = StudentInfo.objects.filter(
+            institution=self.request.institution, disable=False
+        )
         queryset = queryset.annotate(
             phone=F("user__phone"),
             student_first_name=F("user__first_name"),
