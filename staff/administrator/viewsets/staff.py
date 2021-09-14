@@ -48,6 +48,14 @@ class StaffViewSet(CommonInfoViewSet):
         )
         return queryset
 
+    def perform_create(self, serializer):
+        photo = self.request.data.get("photo")
+        serializer.save(
+            photo=photo,
+            created_by=self.request.user,
+            institution=self.request.institution,
+        )
+
     def list(self, request):
         """api to get list of serializer of staff"""
         queryset = Staff.objects.filter(institution=self.request.institution)
@@ -69,8 +77,11 @@ class StaffViewSet(CommonInfoViewSet):
             if user:
                 user_id = get_object_or_404(User, id=user)
                 if user_id:
+                    # remove the existing roles
+                    user_remove = User(id=user_id.id).roles.clear()
                     for role in roles:
-                        user = User(id=user_id.id).roles.add(role)
+                        # adding a new roles
+                        user_add = User(id=user_id.id).roles.add(role)
                         user = User.objects.get(id=user_id.id)
                         data = StaffAssignSerialzer(user)
                     return Response(data.data, status=status.HTTP_200_OK)

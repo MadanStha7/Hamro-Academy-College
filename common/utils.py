@@ -42,9 +42,7 @@ def validate_unique_name(model, value, institution, instance):
             )
     else:
         if model.objects.filter(name=value.title(), institution=institution).exists():
-            raise ValidationError(
-                {"message": [f"{model.__name__} with this name already exists"]}
-            )
+            raise ValidationError([f"{model.__name__} with this name already exists"])
 
     return value
 
@@ -235,7 +233,10 @@ def return_designation_name(staff_id):
     """
     function return the designation name
     """
-    designation = StaffAcademicInfo.objects.values_list(
-        "designation__name", flat=True
-    ).get(staff__id=staff_id)
-    return designation
+    try:
+        designation = StaffAcademicInfo.objects.values_list(
+            "designation__name", flat=True
+        ).get(staff__id=staff_id)
+        return designation
+    except StaffAcademicInfo.DoesNotExist:
+        designation = None

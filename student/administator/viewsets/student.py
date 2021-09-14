@@ -68,7 +68,6 @@ class StudentInfoViewSet(CommonInfoViewSet):
             guardian_first_name=F("guardian_detail__user__first_name"),
             guardian_last_name=F("guardian_detail__user__last_name"),
             relation=F("guardian_detail__relation"),
-            email=F("user__email"),
         )
         serializer = StudentListInfoSerializer(result, many=True)
         return self.get_paginated_response(serializer.data)

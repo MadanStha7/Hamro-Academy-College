@@ -2,6 +2,7 @@ from guardian.models import StudentGuardianInfo
 from student.models import StudentAcademicDetail, StudentInfo, PreviousAcademicDetail
 from staff.administrator.serializers.staff import UserSerializer
 from rest_framework import serializers
+from student.administator.serializer.previous_academic import PreviousAcademicSerializer
 
 
 class StudentAcademicSerializer(serializers.ModelSerializer):

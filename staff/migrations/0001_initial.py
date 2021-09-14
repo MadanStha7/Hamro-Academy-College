@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("academics", "0006_delete_onlineclassinfo"),
+        # ("academics", "0006_delete_onlineclassinfo"),
         ("core", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
