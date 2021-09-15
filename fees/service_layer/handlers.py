@@ -57,9 +57,10 @@ def collect_student_fee(
     (
         collected_student_fees,
         applied_fines,
+        applied_discounts,
         collected_fee_configs,
     ) = views.get_student_fee_collection_detail(
-        student_academic, institution, cmd.fine_id, cmd.fee_configs
+        student_academic, institution, cmd.fee_configs
     )
     repository = FeeConfigRepository()
     model = models.student_fee_collect_factory(
@@ -67,6 +68,7 @@ def collect_student_fee(
         cmd,
         collected_student_fees,
         applied_fines,
+        applied_discounts,
         collected_fee_configs,
     )
     print(model)

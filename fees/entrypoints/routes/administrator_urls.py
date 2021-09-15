@@ -5,10 +5,16 @@ from fees.entrypoints.route_handlers.administrator import (
     FeeConfigView,
     ActivateDeactivateFeeConfig,
     StudentFeeCollectionView,
+    StudentCollectedFeeInvoiceViewset,
 )
 
 router = routers.DefaultRouter()
 router.register(r"fee_setup", FeeSetupViewSet, basename="fee_setup")
+router.register(
+    "student-fee-collected",
+    StudentCollectedFeeInvoiceViewset,
+    basename="fee-collection",
+)
 
 
 urlpatterns = [
