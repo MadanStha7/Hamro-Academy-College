@@ -13,7 +13,7 @@ class FeeSetup(BaseModel):
     due_date: typing.Optional[datetime.date]
     fee_type: str
     due_day: typing.Optional[int]
-    due_type: typing.Optional[int]
+    due_type: typing.Optional[str]
     description: typing.Optional[str]
 
 
