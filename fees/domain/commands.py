@@ -39,14 +39,14 @@ class ActivateDeactivateFeeConfig(Command):
 class StudentFeeSetupCollect(Command):
     fee_config: UUID
     paid_amount: decimal.Decimal
+    fines: typing.Optional[typing.List[UUID]]
+    discounts: typing.Optional[typing.List[UUID]]
 
 
 @dataclass
 class CollectStudentFee(Command):
     fee_configs: typing.List[StudentFeeSetupCollect]
+    receipt_no: str
     payment_method: str
-    fine_id: typing.Optional[UUID] = None
-    discount_in: typing.Optional[str] = None
-    discount: typing.Optional[decimal.Decimal] = None
     narration: typing.Optional[str] = None
     issued_date: typing.Optional[datetime.date] = datetime.date.today()

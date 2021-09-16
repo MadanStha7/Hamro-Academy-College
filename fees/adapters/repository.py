@@ -100,25 +100,22 @@ class FeeConfigRepository:
             student_academic=student_orm.StudentAcademicDetail(
                 id=model.student_academic
             ),
+            receipt_no=model.receipt_no,
             total_paid_amount=model.total_paid_amount,
             total_amount_to_pay=model.total_amount_to_pay,
-            discount_in=model.discount_in,
-            discount=model.discount,
             payment_method=model.payment_method,
             institution=institution,
             narration=model.narration,
             issued_date=model.issued_date,
             created_by=created_by,
         )
-        if model.fine_id:
-            fee_collection.fine.set(model.fine_id)
-            fee_collection.save()
         bulk_paid_fee_config = []
         for fee_config in model.fee_configs:
             fee_collect = orm.StudentPaidFeeSetup(
                 fee_collection=fee_collection,
                 fee_config=orm.FeeConfig(id=fee_config.get("fee_config")),
                 paid_amount=fee_config.get("paid_amount"),
+                total_amount_to_pay=fee_config.get("amount_to_pay"),
                 due_amount=fee_config.get("due_amount")
                 if fee_config.get("due_amount")
                 else 0,
@@ -127,4 +124,28 @@ class FeeConfigRepository:
             )
             bulk_paid_fee_config.append(fee_collect)
 
+            fee_applied_fines = []
+            if fee_config.get("fines"):
+                for fine in fee_config.get("fines"):
+                    fee_applied_fine = orm.FeeAppliedFine(
+                        student_paid_fee_setup=fee_collect,
+                        fine=orm.FineType(id=fine),
+                        institution=institution,
+                        created_by=created_by,
+                    )
+                    fee_applied_fines.append(fee_applied_fine)
+
+            fee_applied_discounts = []
+            if fee_config.get("discounts"):
+                for discount in fee_config.get("discounts"):
+                    fee_applied_discount = orm.FeeAppliedDiscount(
+                        student_paid_fee_setup=fee_collect,
+                        discount=orm.DiscountType(id=discount),
+                        institution=institution,
+                        created_by=created_by,
+                    )
+                    fee_applied_discounts.append(fee_applied_discount)
+
         orm.StudentPaidFeeSetup.objects.bulk_create(bulk_paid_fee_config)
+        orm.FeeAppliedDiscount.objects.bulk_create(fee_applied_discounts)
+        orm.FeeAppliedFine.objects.bulk_create(fee_applied_fines)

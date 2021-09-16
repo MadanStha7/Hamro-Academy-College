@@ -1,9 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import F
 from rest_framework.serializers import ValidationError
-from rest_framework import exceptions, filters, serializers
+from rest_framework import filters, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework import status
@@ -14,12 +15,14 @@ from fees.service_layer.serializers.fee_setup import (
     FeeSetupSerializer,
     FeeConfigSerializer,
     StudentFeeCollectSerializer,
+    FeeCollectionSerializer,
+    StudentPaidFeeSetupSerializer,
 )
 from permissions import administrator
 from fees.orm import models as orm
 from fees.utils.filter import FeeFilter, FeeConfigFilter
 from fees.domain import commands, exceptions
-from fees.orm.models import FeeConfig
+from fees.orm.models import FeeConfig, StudentPaidFeeSetup
 
 
 from common.utils import active_academic_session
@@ -122,3 +125,35 @@ class StudentFeeCollectionView(APIView):
                 return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
             except exceptions.PaidAmountExceedException as e:
                 return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+            except exceptions.SameFeeConfigMultipleTimeException as e:
+                return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StudentCollectedFeeInvoiceViewset(CommonInfoViewSet):
+    permission_classes = [IsAuthenticated, administrator.AdministratorPermission]
+    http_method_names = ["get", "delete"]
+    serializer_class = FeeCollectionSerializer
+
+    def get_queryset(self):
+        student_academic = self.request.query_params.get("student_academic")
+        if student_academic:
+            data = views.get_student_collected_fee_invoices(
+                student_academic, self.request.user.institution
+            )
+            return data
+        raise ValidationError({"error": ["student_academic is required query param"]})
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        paid_fee_setup = StudentPaidFeeSetup.objects.filter(
+            fee_collection=instance
+        ).select_related("fee_config", "fee_collection")
+        paid_fee_setup_serializer = StudentPaidFeeSetupSerializer(
+            paid_fee_setup, many=True, context={"request": request}
+        )
+        context = {
+            "fee_collection": serializer.data,
+            "paid_fee_setup": paid_fee_setup_serializer.data,
+        }
+        return Response(context)
