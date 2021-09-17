@@ -171,3 +171,26 @@ def student_fee_collect_factory(
         discount=cmd.discount,
         narration=cmd.narration,
     )
+
+
+class Scholarship(BaseModel):
+    name: str
+    scholarship_in: str
+    scholarship: decimal.Decimal
+    fee_config: typing.List[UUID]
+
+
+def scholarship_factory(
+    name: str,
+    scholarship_in: str,
+    scholarship: decimal.Decimal,
+    fee_config: typing.List[UUID],
+) -> Scholarship:
+
+    return Scholarship(
+        name=name,
+        scholarship_in=scholarship_in,
+        scholarship=scholarship,
+        fee_config=fee_config
+
+    )
