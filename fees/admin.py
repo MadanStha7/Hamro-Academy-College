@@ -8,6 +8,7 @@ from fees.orm.models import (
     StudentPaidFeeSetup,
     FineType,
     DiscountType,
+    StudentPaidFeeSetupUpdateLog,
 )
 
 admin.site.register(FeeSetup)
@@ -16,3 +17,4 @@ admin.site.register(FeeCollection)
 admin.site.register(StudentPaidFeeSetup)
 admin.site.register(FineType)
 admin.site.register(DiscountType)
+admin.site.register(StudentPaidFeeSetupUpdateLog)

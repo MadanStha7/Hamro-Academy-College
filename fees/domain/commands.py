@@ -50,3 +50,9 @@ class CollectStudentFee(Command):
     payment_method: str
     narration: typing.Optional[str] = None
     issued_date: typing.Optional[datetime.date] = datetime.date.today()
+
+
+@dataclass
+class UpdateStudentPaidFeeConfig(Command):
+    paid_fee_config: UUID
+    paid_amount: decimal.Decimal

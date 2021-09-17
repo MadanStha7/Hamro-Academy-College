@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from academics.models import Faculty, Grade
 from rest_framework import serializers
 import datetime
@@ -10,6 +11,7 @@ from fees.orm.models import (
     FeeCollection,
     FineType,
     StudentPaidFeeSetup,
+    StudentPaidFeeSetupUpdateLog,
 )
 from academics.administrator.serializers.faculty import FacultySerializer
 from academics.administrator.serializers.grade import GradeSerializer
@@ -56,10 +58,31 @@ class FeeSetupSerializer(serializers.ModelSerializer):
 
 class FeeConfigSerializer(serializers.ModelSerializer):
     fee_type_name = serializers.CharField(read_only=True)
+    fee_type_due_date = serializers.CharField(
+        source="fee_type.due_date", read_only=True
+    )
+    fee_type_due_day = serializers.CharField(source="fee_type.due_day", read_only=True)
+    fee_type_due_type = serializers.CharField(
+        source="fee_type.due_type", read_only=True
+    )
+    fee_type_description = serializers.CharField(
+        source="fee_type.description", read_only=True
+    )
 
     class Meta:
         model = FeeConfig
-        fields = ("id", "subject_group", "fee_type", "fee_type_name", "amount")
+        fields = (
+            "id",
+            "subject_group",
+            "fee_type",
+            "fee_type_name",
+            "amount",
+            "fee_type_due_date",
+            "fee_type_due_day",
+            "fee_type_due_type",
+            "is_active",
+            "fee_type_description",
+        )
 
     def validate_amount(self, value):
         if value < 0:
@@ -166,4 +189,32 @@ class StudentPaidFeeSetupSerializer(serializers.ModelSerializer):
             "due_amount",
             "fee_applied_fine",
             "fee_applied_discount",
+        )
+
+
+class UpdateStudentPaidFeeConfigSerializer(serializers.Serializer):
+    paid_fee_config = serializers.UUIDField()
+    paid_amount = serializers.DecimalField(max_digits=20, decimal_places=2)
+
+    class Meta:
+        fields = ("paid_fee_config", "paid_amount")
+
+    def validate_paid_amount(self, value):
+        if value <= 0:
+            raise ValidationError(
+                "Paid amount doesn't accept value less than or equal to zero"
+            )
+
+
+class StudentPaidFeeSetupLogSerializer(serializers.ModelSerializer):
+    fee_type_name = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = StudentPaidFeeSetupUpdateLog
+        fields = (
+            "id",
+            "paid_fee_setup",
+            "fee_type_name",
+            "previous_amount",
+            "updated_amount",
         )

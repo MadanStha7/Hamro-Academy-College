@@ -92,7 +92,6 @@ def get_student_fee_collection(student_academic: UUID, institution: UUID):
         .order_by("fee_config__id")
         .values("fee_config__id", "due_amount")
     )
-    print(paid_fee_type)
     for data in serializer.data:
         for paid_fee in paid_fee_type:
             if str(paid_fee.get("fee_config__id")) == data.get("id"):
