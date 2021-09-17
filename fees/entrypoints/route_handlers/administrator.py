@@ -15,6 +15,7 @@ from fees.service_layer.serializers.fee_setup import (
     FeeConfigSerializer,
     StudentFeeCollectSerializer,
 )
+from fees.service_layer.serializers.scholarship import ScholarshipSerializer
 from permissions import administrator
 from fees.orm import models as orm
 from fees.utils.filter import FeeFilter, FeeConfigFilter
@@ -111,3 +112,28 @@ class StudentFeeCollectionView(APIView):
                 cmd=cmd, student_academic=student_academic
             )
             print(collect_fee)
+
+
+class ScholarshipViewSet(CommonInfoViewSet):
+    permission_classes = [IsAuthenticated, administrator.AdministratorPermission]
+    serializer_class = ScholarshipSerializer
+
+    def get_queryset(self):
+        queryset = handlers.get_scholarship(institution=self.request.institution)
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = ScholarshipSerializer(
+            data=request.data, context={"institution": request.institution}
+        )
+        serializer.is_valid(raise_exception=True)
+        cmd = commands.AddScholarship(**request.data)
+        scholarship = handlers.add_scholarship(
+            institution=self.request.institution, created_by=self.request.user, cmd=cmd
+        )
+        return Response(
+            ScholarshipSerializer(scholarship).data, status=status.HTTP_201_CREATED
+        )
+
+
+
