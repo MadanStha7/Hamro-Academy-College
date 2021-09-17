@@ -49,3 +49,11 @@ class CollectStudentFee(Command):
     discount_in: typing.Optional[str] = None
     discount: typing.Optional[decimal.Decimal] = None
     narration: typing.Optional[str] = None
+
+
+@dataclass
+class AddScholarship(Command):
+    name: str
+    scholarship_in: str
+    scholarship: decimal.Decimal
+    fee_config: typing.List[UUID]
