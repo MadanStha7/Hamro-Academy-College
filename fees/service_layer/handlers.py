@@ -5,7 +5,7 @@ from uuid import UUID
 import typing
 from fees.domain import commands
 from fees.domain import models
-from fees.adapters.repository import FeeSetupRepository, FeeConfigRepository
+from fees.adapters.repository import FeeSetupRepository, FeeConfigRepository, ScholarshipRepository
 from academics.adapters.repository import SubjectGroupRepository
 from fees.service_layer import views
 
@@ -66,3 +66,19 @@ def collect_student_fee(cmd: commands.CollectStudentFee, student_academic, insti
         applied_fines,
         collected_fee_configs,
     )
+
+
+def get_scholarship(institution: UUID, pk=None):
+    repository = ScholarshipRepository()
+    data = repository.get(institution=institution, pk=pk)
+    return data
+
+
+def add_scholarship(institution: UUID, created_by: User, cmd: commands.AddScholarship):
+    repository = ScholarshipRepository()
+    scholarship = models.scholarship_factory(**cmd.__dict__)
+    with transaction.atomic():
+        scholarship = repository.add(scholarship, created_by, institution)
+    return scholarship
+
+
