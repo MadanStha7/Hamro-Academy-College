@@ -111,3 +111,5 @@ SELECT_STATUS = (
 )
 
 DISCOUNT_FINE_OPTIONS = (("P", "Percentage"), ("A", "Amount"))
+
+SCHOLARSHIP_OPTIONS = (("P", "Percent"), ("A", "Amount"))
