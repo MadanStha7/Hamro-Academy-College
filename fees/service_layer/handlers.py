@@ -1,3 +1,4 @@
+from rest_framework.generics import get_object_or_404
 from fees.service_layer.serializers.fee_setup import FeeConfigSerializer
 from django.db import transaction
 from django.contrib.auth import get_user_model
@@ -8,6 +9,7 @@ from fees.domain import models
 from fees.adapters.repository import FeeSetupRepository, FeeConfigRepository
 from academics.adapters.repository import SubjectGroupRepository
 from fees.service_layer import views
+from fees.orm import models as orm
 
 User = get_user_model()
 
@@ -71,6 +73,18 @@ def collect_student_fee(
         applied_discounts,
         collected_fee_configs,
     )
-    print(model)
     with transaction.atomic():
         repository.collect_student_fee_config(model, institution, created_by)
+
+
+def update_student_paid_fee_config(
+    cmd: commands.UpdateStudentPaidFeeConfig, created_by
+):
+    repository = FeeConfigRepository()
+    paid_fee_config = get_object_or_404(orm.StudentPaidFeeSetup, id=cmd.paid_fee_config)
+    total_amount_to_pay = paid_fee_config.total_amount_to_pay
+    update_fee_config_model = models.update_student_paid_fee_config_factory(
+        cmd, total_amount_to_pay, paid_fee_config.paid_amount
+    )
+    with transaction.atomic():
+        repository.update_student_paid_fee_config(update_fee_config_model, created_by)

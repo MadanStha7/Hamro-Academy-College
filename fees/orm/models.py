@@ -210,3 +210,19 @@ class FeeAppliedDiscount(CommonInfo):
     class Meta:
         db_table = "fee_applied_discount"
         ordering = ["-created_on"]
+
+
+class StudentPaidFeeSetupUpdateLog(CommonInfo):
+    """model to save the log if user update the student fee logs"""
+
+    paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup,
+        related_name="student_paid_fee_setup_update_log",
+        on_delete=models.CASCADE,
+    )
+    previous_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    updated_amount = models.DecimalField(max_digits=20, decimal_places=2)
+
+    class Meta:
+        db_table = "student_paid_fee_setup_update_log"
+        ordering = ["-created_on"]

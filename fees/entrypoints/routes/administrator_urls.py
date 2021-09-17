@@ -6,6 +6,7 @@ from fees.entrypoints.route_handlers.administrator import (
     ActivateDeactivateFeeConfig,
     StudentFeeCollectionView,
     StudentCollectedFeeInvoiceViewset,
+    UpdateStudentPaidFeeConfigView,
 )
 
 router = routers.DefaultRouter()
@@ -29,5 +30,10 @@ urlpatterns = [
         "student-fee-collection/",
         StudentFeeCollectionView.as_view(),
         name="student-fee-collection",
+    ),
+    path(
+        "update_paid_fee_config/",
+        UpdateStudentPaidFeeConfigView.as_view(),
+        name="update-paid-fee-config",
     ),
 ]

@@ -39,6 +39,11 @@ class FeeCollect(BaseModel):
     issued_date: typing.Optional[datetime.date] = datetime.date.today()
 
 
+class UpdateStudentPaidFeeConfig(BaseModel):
+    paid_fee_config: UUID
+    paid_amount: decimal.Decimal
+
+
 def fee_setup_factory(
     name: str,
     faculty_id: typing.List[UUID],
@@ -120,6 +125,17 @@ def student_fee_collect_factory(
         for collected_fee_config in collected_fee_configs
         if fee_config.get("fee_config") == str(collected_fee_config.get("id"))
     ]
+
+    if collected_student_fees:
+        for fee_config in cmd.fee_configs:
+            for collected_student_fee in collected_student_fees:
+                if fee_config.get("fee_config") == str(
+                    collected_student_fee.get("fee_config__id")
+                ):
+                    fee_config["amount_to_pay"] = collected_student_fee.get(
+                        "due_amount"
+                    )
+                    break
 
     for fee_config in cmd.fee_configs:
         if fee_config.get("fines"):
@@ -238,4 +254,22 @@ def student_fee_collect_factory(
         narration=cmd.narration,
         issued_date=cmd.issued_date,
         receipt_no=cmd.receipt_no,
+    )
+
+
+def update_student_paid_fee_config_factory(
+    cmd: commands.UpdateStudentPaidFeeConfig, total_amount_to_pay, previous_amount
+):
+    if cmd.paid_amount > total_amount_to_pay:
+        raise exceptions.PaidAmountExceedException(
+            "Paid amount on particular fee type exceed more than to be paid"
+        )
+
+    if float(cmd.paid_amount) == float(previous_amount):
+        raise exceptions.NoChangeException(
+            "Current updated paid amount is same as previously added paid amount"
+        )
+
+    return UpdateStudentPaidFeeConfig(
+        paid_fee_config=cmd.paid_fee_config, paid_amount=cmd.paid_amount
     )

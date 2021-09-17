@@ -8,3 +8,7 @@ class DuplicateFeeConfigPaidException(ValueError):
 
 class SameFeeConfigMultipleTimeException(ValueError):
     pass
+
+
+class NoChangeException(ValueError):
+    pass

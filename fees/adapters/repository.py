@@ -149,3 +149,25 @@ class FeeConfigRepository:
         orm.StudentPaidFeeSetup.objects.bulk_create(bulk_paid_fee_config)
         orm.FeeAppliedDiscount.objects.bulk_create(fee_applied_discounts)
         orm.FeeAppliedFine.objects.bulk_create(fee_applied_fines)
+
+    def update_student_paid_fee_config(
+        self, model: models.UpdateStudentPaidFeeConfig, created_by
+    ):
+        paid_fee_config = orm.StudentPaidFeeSetup.objects.get(id=model.paid_fee_config)
+        orm.StudentPaidFeeSetupUpdateLog.objects.create(
+            paid_fee_setup=paid_fee_config,
+            previous_amount=paid_fee_config.paid_amount,
+            updated_amount=model.paid_amount,
+            created_by=created_by,
+            institution=paid_fee_config.institution,
+        )
+        amount_difference = paid_fee_config.paid_amount - model.paid_amount
+        paid_fee_config.due_amount += amount_difference
+        paid_fee_config.paid_amount = model.paid_amount
+        if amount_difference < 0:
+            paid_fee_config.fee_collection.total_paid_amount += -(amount_difference)
+        else:
+            paid_fee_config.fee_collection.total_paid_amount -= amount_difference
+
+        paid_fee_config.fee_collection.save()
+        paid_fee_config.save()
