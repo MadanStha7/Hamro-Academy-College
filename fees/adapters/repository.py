@@ -96,3 +96,33 @@ class FeeConfigRepository:
         self, student_academic: UUID, cmd, total_fee_amount_to_pay, total_paid_amount
     ):
         pass
+
+
+class ScholarshipRepository:
+    def __init__(self) -> None:
+        pass
+
+    def get(self, institution: UUID) -> orm.Scholarship:
+        data = orm.Scholarship.objects.filter(institution=institution)
+        return data
+
+    def add(
+            self,
+            model: models.Scholarship,
+            created_by: user_orm.SystemUser,
+            institution: UUID,
+    ):
+        values = {
+            "name": model.name,
+            "scholarship_in": model.scholarship_in,
+            "scholarship": model.scholarship,
+            "fee_config": model.fee_config,
+            "created_by": created_by,
+            "institution": institution,
+        }
+        fee_config = values.pop("fee_config")
+        scholarship = orm.Scholarship.objects.create(**values)
+        for fee_config in fee_config:
+            scholarship.fee_config.add(fee_config)
+        scholarship.save()
+        return scholarship
