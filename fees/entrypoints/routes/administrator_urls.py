@@ -4,11 +4,12 @@ from fees.entrypoints.route_handlers.administrator import (
     FeeSetupViewSet,
     FeeConfigView,
     ActivateDeactivateFeeConfig,
-    StudentFeeCollectionView,
+    StudentFeeCollectionView,  ScholarshipViewSet,
 )
 
 router = routers.DefaultRouter()
 router.register(r"fee_setup", FeeSetupViewSet, basename="fee_setup")
+router.register(r"scholarship", ScholarshipViewSet, basename="scholarship")
 
 
 urlpatterns = [
@@ -24,4 +25,4 @@ urlpatterns = [
         StudentFeeCollectionView.as_view(),
         name="student-fee-collection",
     ),
-]
+ ]
