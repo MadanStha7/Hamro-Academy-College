@@ -1,7 +1,7 @@
 from django.db import models
 
 from academics.models import Faculty, Grade, SubjectGroup
-from common.constant import DISCOUNT_FINE_OPTIONS
+from common.constant import DISCOUNT_FINE_OPTIONS, SCHOLARSHIP_OPTIONS
 from common.models import CommonInfo
 from student.models import StudentAcademicDetail
 
@@ -171,4 +171,19 @@ class StudentPaidFeeSetup(CommonInfo):
 
     class Meta:
         db_table = "student_paid_fee_setup"
+        ordering = ["-created_on"]
+
+
+class Scholarship(CommonInfo):
+    name = models.CharField(
+        max_length=100)
+    scholarship_in = models.CharField(max_length=1, choices=SCHOLARSHIP_OPTIONS)
+    scholarship = models.DecimalField(max_digits=10, decimal_places=2)
+    fee_config = models.ManyToManyField(FeeConfig, related_name="scholarship")
+
+    def __str__(self):
+        return "{} -- {}".format(self.name, self.institution)
+
+    class Meta:
+        db_table = "scholarship"
         ordering = ["-created_on"]
