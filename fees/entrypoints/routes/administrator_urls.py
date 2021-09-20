@@ -8,9 +8,13 @@ from fees.entrypoints.route_handlers.administrator import (
     StudentCollectedFeeInvoiceViewset,
     UpdateStudentPaidFeeConfigView,
 )
+from fees.entrypoints.route_handlers.discount_type import DiscountTypeViewSet
+from fees.entrypoints.route_handlers.fine_type import FineTypeViewSet
 
 router = routers.DefaultRouter()
 router.register(r"fee_setup", FeeSetupViewSet, basename="fee_setup")
+router.register("discount_type", DiscountTypeViewSet)
+router.register("fine_type", FineTypeViewSet)
 router.register(
     "student-fee-collected",
     StudentCollectedFeeInvoiceViewset,
