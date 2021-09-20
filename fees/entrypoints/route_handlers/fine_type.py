@@ -1,8 +1,8 @@
 from rest_framework import filters
 
 from common.administrator.viewset import CommonInfoViewSet
-from fees.administrator.serializers.fine_type import FineTypeSerializer
-from fees.models import FineType
+from fees.service_layer.serializers.fine_type import FineTypeSerializer
+from fees.orm.models import FineType
 
 
 class FineTypeViewSet(CommonInfoViewSet):

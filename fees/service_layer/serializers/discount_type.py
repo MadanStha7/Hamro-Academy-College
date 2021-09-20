@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from common.utils import validate_unique_name
-from fees.models import DiscountType
+from fees.orm.models import DiscountType
 
 
 class DiscountTypeSerializer(serializers.ModelSerializer):
