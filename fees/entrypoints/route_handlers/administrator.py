@@ -1,9 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import F
 from rest_framework.serializers import ValidationError
-from rest_framework import exceptions, filters, serializers
+from rest_framework import filters, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework import status
@@ -14,12 +15,16 @@ from fees.service_layer.serializers.fee_setup import (
     FeeSetupSerializer,
     FeeConfigSerializer,
     StudentFeeCollectSerializer,
+    FeeCollectionSerializer,
+    StudentPaidFeeSetupSerializer,
+    UpdateStudentPaidFeeConfigSerializer,
+    StudentPaidFeeSetupLogSerializer,
 )
 from permissions import administrator
 from fees.orm import models as orm
 from fees.utils.filter import FeeFilter, FeeConfigFilter
-from fees.domain import commands, exceptions
-from fees.orm.models import FeeConfig
+from fees.domain import commands, exceptions as domain_exceptions
+from fees.orm.models import FeeConfig, StudentPaidFeeSetup
 
 
 from common.utils import active_academic_session
@@ -118,7 +123,73 @@ class StudentFeeCollectionView(APIView):
                     {"message": ["Student fee collected successfully"]},
                     status=status.HTTP_201_CREATED,
                 )
-            except exceptions.DuplicateFeeConfigPaidException as e:
+            except domain_exceptions.DuplicateFeeConfigPaidException as e:
                 return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
-            except exceptions.PaidAmountExceedException as e:
+            except domain_exceptions.PaidAmountExceedException as e:
                 return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+            except domain_exceptions.SameFeeConfigMultipleTimeException as e:
+                return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StudentCollectedFeeInvoiceViewset(CommonInfoViewSet):
+    permission_classes = [IsAuthenticated, administrator.AdministratorPermission]
+    http_method_names = ["get", "delete"]
+    serializer_class = FeeCollectionSerializer
+
+    def get_queryset(self):
+        student_academic = self.request.query_params.get("student_academic")
+        if student_academic:
+            data = views.get_student_collected_fee_invoices(
+                student_academic, self.request.user.institution
+            )
+            return data
+        raise ValidationError({"error": ["student_academic is required query param"]})
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        paid_fee_setup = StudentPaidFeeSetup.objects.filter(
+            fee_collection=instance
+        ).select_related("fee_config", "fee_collection")
+        paid_fee_setup_serializer = StudentPaidFeeSetupSerializer(
+            paid_fee_setup, many=True, context={"request": request}
+        )
+        context = {
+            "fee_collection": serializer.data,
+            "paid_fee_config": paid_fee_setup_serializer.data,
+        }
+        return Response(context)
+
+    @action(detail=False, methods=["GET"])
+    def student_paid_fee_logs(self, request, *args, **kwargs):
+        student_academic = request.query_params.get("student_academic")
+        if student_academic:
+            logs = (
+                orm.StudentPaidFeeSetupUpdateLog.objects.filter(
+                    paid_fee_setup__fee_collection__student_academic=student_academic
+                )
+                .annotate(fee_type_name=F("paid_fee_setup__fee_config__fee_type__name"))
+                .select_related("paid_fee_setup")
+            )
+            serializer = StudentPaidFeeSetupLogSerializer(logs, many=True)
+            return Response(serializer.data)
+        raise ValidationError(
+            {"error": ["student_academic is required query parameter"]}
+        )
+
+
+class UpdateStudentPaidFeeConfigView(APIView):
+    permission_classes = [IsAuthenticated, administrator.AdministratorPermission]
+
+    def post(self, request, *args, **kwargs):
+        serializer = UpdateStudentPaidFeeConfigSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            cmd = commands.UpdateStudentPaidFeeConfig(**request.data)
+            handlers.update_student_paid_fee_config(cmd, self.request.user)
+            return Response({"message": ["Fee updated successfully"]})
+        except domain_exceptions.NoChangeException as e:
+            return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)
+
+        except domain_exceptions.PaidAmountExceedException as e:
+            return Response({"error": [str(e)]}, status=status.HTTP_400_BAD_REQUEST)

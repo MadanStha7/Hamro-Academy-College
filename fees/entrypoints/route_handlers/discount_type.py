@@ -1,7 +1,7 @@
 from rest_framework import filters
 from common.administrator.viewset import CommonInfoViewSet
-from fees.administrator.serializers.discount_type import DiscountTypeSerializer
-from fees.models import DiscountType
+from fees.service_layer.serializers.discount_type import DiscountTypeSerializer
+from fees.orm.models import DiscountType
 
 
 class DiscountTypeViewSet(CommonInfoViewSet):

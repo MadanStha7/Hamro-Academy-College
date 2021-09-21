@@ -118,6 +118,9 @@ class FeeConfig(CommonInfo):
 class FeeCollection(CommonInfo):
     DISCOUNT_OPTIONS = (("P", "Percentage"), ("A", "Amount"))
     PAYMENT_METHOD = (("cash", "Cash"), ("bank-transfer", "Bank Transfer"))
+    receipt_no = models.CharField(
+        max_length=31, null=True, help_text="Receipt ID of the student fee payment"
+    )
     student_academic = models.ForeignKey(
         StudentAcademicDetail, related_name="fee_collection", on_delete=models.CASCADE
     )
@@ -166,11 +169,60 @@ class StudentPaidFeeSetup(CommonInfo):
         on_delete=models.PROTECT,
         help_text="Type of fee config student paid",
         blank=True,
-        null=True
+        null=True,
     )
+    total_amount_to_pay = models.DecimalField(max_digits=20, decimal_places=2)
     paid_amount = models.DecimalField(max_digits=20, decimal_places=2)
     due_amount = models.DecimalField(max_digits=20, decimal_places=2)
 
     class Meta:
         db_table = "student_paid_fee_setup"
+        ordering = ["-created_on"]
+
+
+class FeeAppliedFine(CommonInfo):
+    """model to stores the fines that is applied in particular fee type"""
+
+    student_paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup, related_name="fee_applied_fine", on_delete=models.CASCADE
+    )
+    fine = models.ForeignKey(
+        FineType, related_name="fee_applied_fine", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = "fee_applied_fine"
+        ordering = ["-created_on"]
+
+
+class FeeAppliedDiscount(CommonInfo):
+    """model to stores the discounts that is applied in particular fee type"""
+
+    student_paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup,
+        related_name="fee_applied_discount",
+        on_delete=models.CASCADE,
+    )
+    discount = models.ForeignKey(
+        DiscountType, related_name="fee_applied_discount", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = "fee_applied_discount"
+        ordering = ["-created_on"]
+
+
+class StudentPaidFeeSetupUpdateLog(CommonInfo):
+    """model to save the log if user update the student fee logs"""
+
+    paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup,
+        related_name="student_paid_fee_setup_update_log",
+        on_delete=models.CASCADE,
+    )
+    previous_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    updated_amount = models.DecimalField(max_digits=20, decimal_places=2)
+
+    class Meta:
+        db_table = "student_paid_fee_setup_update_log"
         ordering = ["-created_on"]
