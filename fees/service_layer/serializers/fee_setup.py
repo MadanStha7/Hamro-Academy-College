@@ -148,6 +148,8 @@ class StudentFeeCollectSerializer(serializers.ModelSerializer):
 
 
 class FeeCollectionSerializer(serializers.ModelSerializer):
+    student_paid_fee_setup = serializers.StringRelatedField(many=True, read_only=True)
+
     class Meta:
         model = FeeCollection
         fields = (
@@ -158,6 +160,7 @@ class FeeCollectionSerializer(serializers.ModelSerializer):
             "total_paid_amount",
             "issued_date",
             "narration",
+            "student_paid_fee_setup",
         )
 
 
@@ -178,12 +181,14 @@ class FeeAppliedDiscountSerializer(serializers.ModelSerializer):
 class StudentPaidFeeSetupSerializer(serializers.ModelSerializer):
     fee_applied_fine = FeeAppliedFineSerializer(many=True, read_only=True)
     fee_applied_discount = FeeAppliedDiscountSerializer(many=True, read_only=True)
+    fee_type = serializers.CharField(read_only=True)
 
     class Meta:
         model = StudentPaidFeeSetup
         fields = (
             "id",
             "fee_config",
+            "fee_type",
             "total_amount_to_pay",
             "paid_amount",
             "due_amount",
@@ -218,3 +223,23 @@ class StudentPaidFeeSetupLogSerializer(serializers.ModelSerializer):
             "previous_amount",
             "updated_amount",
         )
+
+
+class StudentFeeInvoiceSerializer(serializers.ModelSerializer):
+    student_paid_fee_setup = StudentPaidFeeSetupSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = FeeCollection
+        fields = [
+            "id",
+            "student_paid_fee_setup",
+            "institution",
+            "student_academic",
+            "receipt_no",
+            "issued_date",
+            "total_amount_to_pay",
+            "total_paid_amount",
+            "narration",
+            "payment_method",
+        ]
+        depth = 1

@@ -7,6 +7,7 @@ from fees.entrypoints.route_handlers.administrator import (
     StudentFeeCollectionView,
     StudentCollectedFeeInvoiceViewset,
     UpdateStudentPaidFeeConfigView,
+    StudentFeeInvoiceView,
 )
 from fees.entrypoints.route_handlers.discount_type import DiscountTypeViewSet
 from fees.entrypoints.route_handlers.fine_type import FineTypeViewSet
@@ -40,4 +41,5 @@ urlpatterns = [
         UpdateStudentPaidFeeConfigView.as_view(),
         name="update-paid-fee-config",
     ),
+    path("fee-invoice/", StudentFeeInvoiceView.as_view(), name="student-fee-invoice"),
 ]
