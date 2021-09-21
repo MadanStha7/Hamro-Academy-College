@@ -6,6 +6,7 @@ from rest_framework import serializers
 
 from common.constant import SYSTEM_DEFAULT_PASSWORD
 from common.utils import validate_unique_phone, to_internal_value
+from student.administator.serializer.academic import StudentAcademicSerializer
 
 from student.models import StudentInfo
 
@@ -37,6 +38,7 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
     relation = serializers.CharField(read_only=True)
     phone = serializers.CharField(read_only=True)
     email = serializers.CharField(read_only=True)
+    student_academic_detail = StudentAcademicSerializer(read_only=True, many=True)
 
     class Meta:
         model = StudentInfo
@@ -55,6 +57,7 @@ class StudentListInfoSerializer(serializers.ModelSerializer):
             "email",
             "status",
             "disable",
+            "student_academic_detail",
         ]
 
 

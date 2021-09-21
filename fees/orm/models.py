@@ -175,6 +175,9 @@ class StudentPaidFeeSetup(CommonInfo):
     paid_amount = models.DecimalField(max_digits=20, decimal_places=2)
     due_amount = models.DecimalField(max_digits=20, decimal_places=2)
 
+    def __str__(self) -> str:
+        return f"{self.fee_config.fee_type.name}"
+
     class Meta:
         db_table = "student_paid_fee_setup"
         ordering = ["-created_on"]

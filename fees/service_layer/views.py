@@ -146,5 +146,5 @@ def get_student_collected_fee_invoices(student_academic: UUID, institution: UUID
     """views to get the student invoice record information"""
     fee_collections = FeeCollection.objects.filter(
         student_academic=student_academic, institution=institution
-    )
+    ).prefetch_related("student_paid_fee_setup")
     return fee_collections

@@ -74,7 +74,10 @@ def collect_student_fee(
         collected_fee_configs,
     )
     with transaction.atomic():
-        repository.collect_student_fee_config(model, institution, created_by)
+        fee_collection_obj = repository.collect_student_fee_config(
+            model, institution, created_by
+        )
+        return fee_collection_obj
 
 
 def update_student_paid_fee_config(

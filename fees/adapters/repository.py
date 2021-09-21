@@ -149,6 +149,7 @@ class FeeConfigRepository:
         orm.StudentPaidFeeSetup.objects.bulk_create(bulk_paid_fee_config)
         orm.FeeAppliedDiscount.objects.bulk_create(fee_applied_discounts)
         orm.FeeAppliedFine.objects.bulk_create(fee_applied_fines)
+        return fee_collection
 
     def update_student_paid_fee_config(
         self, model: models.UpdateStudentPaidFeeConfig, created_by
