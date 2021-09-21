@@ -54,6 +54,11 @@ class StudentDisableAPIView(APIView):
         assert self.paginator is not None
         return self.paginator.get_paginated_response(data)
 
+    def filter_queryset(self, queryset):
+        for backend in list(self.filter_backends):
+            queryset = backend().filter_queryset(self.request, queryset, self)
+        return queryset
+
     def get(self, request, format=None):
         queryset = StudentInfo.objects.filter(
             disable=True, institution=self.request.institution
@@ -73,6 +78,7 @@ class StudentDisableAPIView(APIView):
             relation_name=F("guardian_detail__relation"),
             email=F("user__email"),
         )
+        queryset = self.filter_queryset(queryset)
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_paginated_response(
