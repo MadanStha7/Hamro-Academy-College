@@ -17,7 +17,7 @@ class FeeSetup(CommonInfo):
     faculty = models.ManyToManyField(Faculty, related_name="fee_setup")
     grade = models.ManyToManyField(Grade, related_name="fee_setup")
     due_date = models.DateField(blank=True, null=True)
-    fee_type = models.CharField(choices=FEE_TYPE, max_length=31)
+    fee_type = models.CharField(choices=FEE_TYPE, max_length=31, blank=True, null=True)
     due_day = models.IntegerField(default=0, blank=True, null=True)
     due_type = models.CharField(choices=DUE_TYPE, max_length=7, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -118,6 +118,9 @@ class FeeConfig(CommonInfo):
 class FeeCollection(CommonInfo):
     DISCOUNT_OPTIONS = (("P", "Percentage"), ("A", "Amount"))
     PAYMENT_METHOD = (("cash", "Cash"), ("bank-transfer", "Bank Transfer"))
+    receipt_no = models.CharField(
+        max_length=31, null=True, help_text="Receipt ID of the student fee payment"
+    )
     student_academic = models.ForeignKey(
         StudentAcademicDetail, related_name="fee_collection", on_delete=models.CASCADE
     )
@@ -160,20 +163,27 @@ class StudentPaidFeeSetup(CommonInfo):
         on_delete=models.CASCADE,
         help_text="Master fee collection",
     )
-    fee_type = models.ForeignKey(
-        FeeSetup,
+    fee_config = models.ForeignKey(
+        FeeConfig,
         related_name="student_paid_fee_setup",
         on_delete=models.PROTECT,
-        help_text="Type of fee student paid",
+        help_text="Type of fee config student paid",
+        blank=True,
+        null=True,
     )
+    total_amount_to_pay = models.DecimalField(max_digits=20, decimal_places=2)
     paid_amount = models.DecimalField(max_digits=20, decimal_places=2)
     due_amount = models.DecimalField(max_digits=20, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f"{self.fee_config.fee_type.name}"
 
     class Meta:
         db_table = "student_paid_fee_setup"
         ordering = ["-created_on"]
 
 
+<<<<<<< HEAD
 class Scholarship(CommonInfo):
     name = models.CharField(
         max_length=100)
@@ -186,4 +196,51 @@ class Scholarship(CommonInfo):
 
     class Meta:
         db_table = "scholarship"
+=======
+class FeeAppliedFine(CommonInfo):
+    """model to stores the fines that is applied in particular fee type"""
+
+    student_paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup, related_name="fee_applied_fine", on_delete=models.CASCADE
+    )
+    fine = models.ForeignKey(
+        FineType, related_name="fee_applied_fine", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = "fee_applied_fine"
+        ordering = ["-created_on"]
+
+
+class FeeAppliedDiscount(CommonInfo):
+    """model to stores the discounts that is applied in particular fee type"""
+
+    student_paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup,
+        related_name="fee_applied_discount",
+        on_delete=models.CASCADE,
+    )
+    discount = models.ForeignKey(
+        DiscountType, related_name="fee_applied_discount", on_delete=models.CASCADE
+    )
+
+    class Meta:
+        db_table = "fee_applied_discount"
+        ordering = ["-created_on"]
+
+
+class StudentPaidFeeSetupUpdateLog(CommonInfo):
+    """model to save the log if user update the student fee logs"""
+
+    paid_fee_setup = models.ForeignKey(
+        StudentPaidFeeSetup,
+        related_name="student_paid_fee_setup_update_log",
+        on_delete=models.CASCADE,
+    )
+    previous_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    updated_amount = models.DecimalField(max_digits=20, decimal_places=2)
+
+    class Meta:
+        db_table = "student_paid_fee_setup_update_log"
+>>>>>>> 99d178ed1e1151a148757ae8435c9fce70bedea4
         ordering = ["-created_on"]

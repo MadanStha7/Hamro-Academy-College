@@ -6,6 +6,7 @@ from core import models as core_orm
 from user import models as user_orm
 from academics import models as academic_orm
 from fees.domain import models
+from student import models as student_orm
 
 
 class FeeSetupRepository:
@@ -93,7 +94,7 @@ class FeeConfigRepository:
         return fee_config_
 
     def collect_student_fee_config(
-        self, student_academic: UUID, cmd, total_fee_amount_to_pay, total_paid_amount
+        self, model: models.FeeCollect, institution, created_by
     ):
         pass
 
@@ -126,3 +127,81 @@ class ScholarshipRepository:
             scholarship.fee_config.add(fee_config)
         scholarship.save()
         return scholarship
+
+        fee_collection = orm.FeeCollection.objects.create(
+            student_academic=student_orm.StudentAcademicDetail(
+                id=model.student_academic
+            ),
+            receipt_no=model.receipt_no,
+            total_paid_amount=model.total_paid_amount,
+            total_amount_to_pay=model.total_amount_to_pay,
+            payment_method=model.payment_method,
+            institution=institution,
+            narration=model.narration,
+            issued_date=model.issued_date,
+            created_by=created_by,
+        )
+        bulk_paid_fee_config = []
+        for fee_config in model.fee_configs:
+            fee_collect = orm.StudentPaidFeeSetup(
+                fee_collection=fee_collection,
+                fee_config=orm.FeeConfig(id=fee_config.get("fee_config")),
+                paid_amount=fee_config.get("paid_amount"),
+                total_amount_to_pay=fee_config.get("amount_to_pay"),
+                due_amount=fee_config.get("due_amount")
+                if fee_config.get("due_amount")
+                else 0,
+                institution=institution,
+                created_by=created_by,
+            )
+            bulk_paid_fee_config.append(fee_collect)
+
+            fee_applied_fines = []
+            if fee_config.get("fines"):
+                for fine in fee_config.get("fines"):
+                    fee_applied_fine = orm.FeeAppliedFine(
+                        student_paid_fee_setup=fee_collect,
+                        fine=orm.FineType(id=fine),
+                        institution=institution,
+                        created_by=created_by,
+                    )
+                    fee_applied_fines.append(fee_applied_fine)
+
+            fee_applied_discounts = []
+            if fee_config.get("discounts"):
+                for discount in fee_config.get("discounts"):
+                    fee_applied_discount = orm.FeeAppliedDiscount(
+                        student_paid_fee_setup=fee_collect,
+                        discount=orm.DiscountType(id=discount),
+                        institution=institution,
+                        created_by=created_by,
+                    )
+                    fee_applied_discounts.append(fee_applied_discount)
+
+        orm.StudentPaidFeeSetup.objects.bulk_create(bulk_paid_fee_config)
+        orm.FeeAppliedDiscount.objects.bulk_create(fee_applied_discounts)
+        orm.FeeAppliedFine.objects.bulk_create(fee_applied_fines)
+        return fee_collection
+
+    def update_student_paid_fee_config(
+        self, model: models.UpdateStudentPaidFeeConfig, created_by
+    ):
+        paid_fee_config = orm.StudentPaidFeeSetup.objects.get(id=model.paid_fee_config)
+        orm.StudentPaidFeeSetupUpdateLog.objects.create(
+            paid_fee_setup=paid_fee_config,
+            previous_amount=paid_fee_config.paid_amount,
+            updated_amount=model.paid_amount,
+            created_by=created_by,
+            institution=paid_fee_config.institution,
+        )
+        amount_difference = paid_fee_config.paid_amount - model.paid_amount
+        paid_fee_config.due_amount += amount_difference
+        paid_fee_config.paid_amount = model.paid_amount
+        if amount_difference < 0:
+            paid_fee_config.fee_collection.total_paid_amount += -(amount_difference)
+        else:
+            paid_fee_config.fee_collection.total_paid_amount -= amount_difference
+
+        paid_fee_config.fee_collection.save()
+        paid_fee_config.save()
+

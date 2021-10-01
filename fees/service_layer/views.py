@@ -6,7 +6,14 @@ from fees.domain.models import fee_setup_factory
 from uuid import UUID
 from fees.service_layer.serializers.fee_setup import FeeConfigSerializer
 from student.models import StudentAcademicDetail
-from fees.orm.models import FeeConfig, FeeSetup, StudentPaidFeeSetup, FineType
+from fees.orm.models import (
+    DiscountType,
+    FeeCollection,
+    FeeConfig,
+    FeeSetup,
+    StudentPaidFeeSetup,
+    FineType,
+)
 from academics.models import SubjectGroup, Grade, Faculty
 
 
@@ -78,33 +85,66 @@ def get_student_fee_collection(student_academic: UUID, institution: UUID):
     ).annotate(fee_type_name=F("fee_type__name"))
 
     serializer = FeeConfigSerializer(fee_configs, many=True)
-    paid_fee_type = StudentPaidFeeSetup.objects.filter(
-        fee_collection__student_academic=student_academic
-    ).values("fee_type__id", "due_amount")
+    paid_fee_type = (
+        StudentPaidFeeSetup.objects.filter(
+            fee_collection__student_academic=student_academic
+        )
+        .order_by("fee_config__id")
+        .values("fee_config__id", "due_amount")
+    )
     for data in serializer.data:
         for paid_fee in paid_fee_type:
-            if paid_fee.get("fee_type__id") == data.get("fee_type"):
-                data["amount"] = paid_fee.get("due_amount")
-    return serializer.data
+            if str(paid_fee.get("fee_config__id")) == data.get("id"):
+                data["amount"] = str(paid_fee.get("due_amount"))
+    data = [data for data in serializer.data if float(data.get("amount")) > 0]
+    return data
 
 
 def get_student_fee_collection_detail(
     student_academic: UUID,
     institution: UUID,
-    fine_id: typing.List[UUID],
-    fee_types: typing.List[typing.Dict],
+    fee_configs: typing.List[typing.Dict],
 ):
     """
     views to return the data, that is needed for student
     fee collection this includes, previous_collected_fees, applicable_fines
     """
-    collected_student_fees = StudentPaidFeeSetup.objects.filter(
-        fee_collection__student_academic__id=student_academic, institution=institution
-    ).values("fee_type__id", "paid_amount", "due_amount")
-    applied_fines = FineType.objects.filter(
-        institution=institution, id__in=fine_id
-    ).values("id", "fine_mode", "fine_amount")
+    collected_student_fees = (
+        StudentPaidFeeSetup.objects.filter(
+            fee_collection__student_academic__id=student_academic,
+            institution=institution,
+        )
+        .order_by("-created_on")
+        .values("fee_config__id", "paid_amount", "due_amount")
+    )
+
+    fee_config_ids = [fee_config.get("fee_config") for fee_config in fee_configs]
     collected_fee_configs = FeeConfig.objects.filter(
-        institution=institution, id__in=fee_types, is_active=True
+        institution=institution, id__in=fee_config_ids, is_active=True
     ).values("id", "amount")
-    return collected_student_fees, applied_fines, collected_fee_configs
+    applied_fines = []
+    discounts = []
+    for fee_config in fee_configs:
+        applied_fines += fee_config.get("fines") if fee_config.get("fines") else []
+        discounts += fee_config.get("discounts") if fee_config.get("discounts") else []
+
+    applied_fines = FineType.objects.filter(
+        institution=institution, id__in=applied_fines
+    ).values("id", "fine_mode", "fine_amount")
+    applied_discounts = DiscountType.objects.filter(
+        institution=institution, id__in=discounts
+    ).values("id", "discount_mode", "discount_amount")
+    return (
+        collected_student_fees,
+        applied_fines,
+        applied_discounts,
+        collected_fee_configs,
+    )
+
+
+def get_student_collected_fee_invoices(student_academic: UUID, institution: UUID):
+    """views to get the student invoice record information"""
+    fee_collections = FeeCollection.objects.filter(
+        student_academic=student_academic, institution=institution
+    ).prefetch_related("student_paid_fee_setup")
+    return fee_collections

@@ -13,7 +13,7 @@ class FeeSetup(BaseModel):
     due_date: typing.Optional[datetime.date]
     fee_type: str
     due_day: typing.Optional[int]
-    due_type: typing.Optional[int]
+    due_type: typing.Optional[str]
     description: typing.Optional[str]
 
 
@@ -30,14 +30,18 @@ class ActivateDeactivateFeeConfig(BaseModel):
 
 class FeeCollect(BaseModel):
     student_academic: UUID
+    receipt_no: str
     fee_configs: typing.List[typing.Dict]
     total_amount_to_pay: decimal.Decimal
     total_paid_amount: decimal.Decimal
     payment_method: str
-    fine_id: typing.Optional[UUID] = None
-    discount_in: typing.Optional[str] = None
-    discount: typing.Optional[decimal.Decimal] = None
     narration: typing.Optional[str] = None
+    issued_date: typing.Optional[datetime.date] = datetime.date.today()
+
+
+class UpdateStudentPaidFeeConfig(BaseModel):
+    paid_fee_config: UUID
+    paid_amount: decimal.Decimal
 
 
 def fee_setup_factory(
@@ -47,7 +51,7 @@ def fee_setup_factory(
     due_date: typing.Optional[datetime.date],
     fee_type: str,
     due_day: typing.Optional[int],
-    due_type: typing.Optional[int],
+    due_type: typing.Optional[str],
     description: typing.Optional[str],
 ) -> FeeSetup:
 
@@ -100,17 +104,65 @@ def student_fee_collect_factory(
     cmd: commands.CollectStudentFee,
     collected_student_fees: typing.List[typing.Dict],
     applicable_fines: typing.Optional[typing.List[typing.Dict]],
+    applicable_discounts: typing.Optional[typing.List[typing.Dict]],
     collected_fee_configs: typing.List[typing.Dict],
 ) -> FeeCollect:
     total_paid_amount = 0
-    for fee_type in cmd.fee_configs:
-        total_paid_amount += fee_type.get("paid_amount")
+    paying_fee_configs = []
+
+    for fee_config in cmd.fee_configs:
+        total_paid_amount += fee_config.get("paid_amount")
+        paying_fee_configs.append(fee_config.get("fee_config"))
+
+    if len(paying_fee_configs) != len(set(paying_fee_configs)):
+        raise exceptions.SameFeeConfigMultipleTimeException(
+            "You are not allowed to pay two fee configs separately"
+        )
+
+    [
+        fee_config.update({"amount_to_pay": collected_fee_config.get("amount")})
+        for fee_config in cmd.fee_configs
+        for collected_fee_config in collected_fee_configs
+        if fee_config.get("fee_config") == str(collected_fee_config.get("id"))
+    ]
+
+    if collected_student_fees:
+        for fee_config in cmd.fee_configs:
+            for collected_student_fee in collected_student_fees:
+                if fee_config.get("fee_config") == str(
+                    collected_student_fee.get("fee_config__id")
+                ):
+                    fee_config["amount_to_pay"] = collected_student_fee.get(
+                        "due_amount"
+                    )
+                    break
+
+    for fee_config in cmd.fee_configs:
+        if fee_config.get("fines"):
+            amount_to_pay = fee_config.get("amount_to_pay")
+            for fine in applicable_fines:
+                if str(fine.get("id")) in fee_config.get("fines"):
+                    fee_config["amount_to_pay"] += (
+                        fine.get("fine_amount")
+                        if fine.get("fine_mode") == "A"
+                        else (amount_to_pay * fine.get("fine_amount") / 100)
+                    )
+
+        if fee_config.get("discounts"):
+            amount_to_pay = fee_config.get("amount_to_pay")
+            for discount in applicable_discounts:
+                if str(discount.get("id")) in fee_config.get("discounts"):
+                    fee_config["amount_to_pay"] -= (
+                        discount.get("discount_amount")
+                        if discount.get("discount_mode") == "A"
+                        else (amount_to_pay * discount.get("discount_amount") / 100)
+                    )
 
     # checking if user is paying more amount than the amount
     # he has to pay and checking if particular fee_config is paid or not
     for fee in collected_student_fees:
         for fee_config in cmd.fee_configs:
-            if str(fee.get("fee_type__id")) == fee_config.get("fee_type"):
+            if str(fee.get("fee_config__id")) == fee_config.get("fee_config"):
                 if fee_config.get("paid_amount") > fee.get("due_amount"):
                     raise exceptions.PaidAmountExceedException(
                         "Paid amount on particular fee type exceed more than to be paid"
@@ -122,43 +174,76 @@ def student_fee_collect_factory(
 
     total_fee_amount_to_pay = 0
     # calculating the due_amount and checking if user is paying more amount the the amount he has to pay
-    for collected_fee_config in collected_fee_configs:
-        for fee_config in cmd.fee_configs:
-            if str(collected_fee_config.get("id")) == fee_config.get("fee_config"):
-                if collected_fee_config.get("amount") < fee_config.get("paid_amount"):
-                    raise exceptions.PaidAmountExceedException(
-                        "Paid amount on particular fee type exceed more than to be paid"
-                    )
-                elif collected_fee_config.get("amount") > fee_config.get("paid_amount"):
-                    fee_config.update(
-                        {
-                            "due_amount": collected_fee_config.get("amount")
-                            - fee_config.get("paid_amount")
-                        }
-                    )
+    for fee_config in cmd.fee_configs:
+        if fee_config.get("amount_to_pay") < fee_config.get("paid_amount"):
+            raise exceptions.PaidAmountExceedException(
+                "Paid amount on particular fee type exceed more than to be paid"
+            )
+        elif fee_config.get("amount_to_pay") >= fee_config.get("paid_amount"):
+            if collected_student_fees:
+                for student_paid in collected_student_fees:
+                    if str(student_paid.get("fee_config__id")) == fee_config.get(
+                        "fee_config"
+                    ):
+                        if student_paid.get("due_amount") > 0:
+                            if student_paid.get("due_amount") > fee_config.get(
+                                "paid_amount"
+                            ):
+                                fee_config.update(
+                                    {
+                                        "due_amount": student_paid.get("due_amount")
+                                        - fee_config.get("paid_amount")
+                                    }
+                                )
+                                break
+                            elif student_paid.get("due_amount") < fee_config.get(
+                                "paid_amount"
+                            ):
+                                raise exceptions.PaidAmountExceedException(
+                                    "Paid amount on particular fee type exceed more than to be paid"
+                                )
+                            else:
+                                fee_config.update({"due_amount": 0})
+                                break
+                    else:
+                        fee_config.update(
+                            {
+                                "due_amount": fee_config.get("amount_to_pay")
+                                - fee_config.get("paid_amount")
+                            }
+                        )
 
-                total_fee_amount_to_pay += collected_fee_config.get("amount")
+            else:
+                fee_config.update(
+                    {
+                        "due_amount": fee_config.get("amount_to_pay")
+                        - fee_config.get("paid_amount")
+                    }
+                )
+
+            total_fee_amount_to_pay += fee_config.get("amount_to_pay")
 
     # adding the fines to the fee
-    for fine in cmd.fine_id:
-        if applicable_fines:
-            for applicable_fine in applicable_fines:
-                if str(applicable_fine.get("id")) == fine:
-                    total_fee_amount_to_pay += (
-                        applicable_fine.get("fee_amount")
-                        if applicable_fine.get("mode") == "A"
-                        else (
-                            total_fee_amount_to_pay
-                            * applicable_fine.get("fee_amount")
-                            / 100
-                        )
-                    )
+    # for fine in cmd.fine_id:
+    #     if applicable_fines:
+    #         for applicable_fine in applicable_fines:
+    #             if applicable_fine.get("id") == fine:
+    #                 total_fee_amount_to_pay += (
+    #                     applicable_fine.get("fee_amount")
+    #                     if applicable_fine.get("mode") == "A"
+    #                     else (
+    #                         total_fee_amount_to_pay
+    #                         * applicable_fine.get("fee_amount")
+    #                         / 100
+    #                     )
+    #                 )
 
-    total_fee_amount_to_pay -= (
-        cmd.discount
-        if cmd.discount_id == "A"
-        else (total_fee_amount_to_pay * cmd.discount / 100)
-    )
+    # if cmd.discount:
+    #     total_fee_amount_to_pay -= (
+    #         cmd.discount
+    #         if cmd.discount_in == "A"
+    #         else (total_fee_amount_to_pay * cmd.discount / 100)
+    #     )
 
     return FeeCollect(
         student_academic=student_academic,
@@ -166,10 +251,27 @@ def student_fee_collect_factory(
         total_amount_to_pay=total_fee_amount_to_pay,
         total_paid_amount=total_paid_amount,
         payment_method=cmd.payment_method,
-        fine_id=cmd.fine_id,
-        discount_in=cmd.discount_in,
-        discount=cmd.discount,
         narration=cmd.narration,
+        issued_date=cmd.issued_date,
+        receipt_no=cmd.receipt_no,
+    )
+
+
+def update_student_paid_fee_config_factory(
+    cmd: commands.UpdateStudentPaidFeeConfig, total_amount_to_pay, previous_amount
+):
+    if cmd.paid_amount > total_amount_to_pay:
+        raise exceptions.PaidAmountExceedException(
+            "Paid amount on particular fee type exceed more than to be paid"
+        )
+
+    if float(cmd.paid_amount) == float(previous_amount):
+        raise exceptions.NoChangeException(
+            "Current updated paid amount is same as previously added paid amount"
+        )
+
+    return UpdateStudentPaidFeeConfig(
+        paid_fee_config=cmd.paid_fee_config, paid_amount=cmd.paid_amount
     )
 
 

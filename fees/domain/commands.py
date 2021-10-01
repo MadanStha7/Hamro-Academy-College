@@ -18,7 +18,7 @@ class AddFeeSetup(Command):
     fee_type: str
     due_date: typing.Optional[datetime.date] = None
     due_day: typing.Optional[int] = None
-    due_type: typing.Optional[int] = None
+    due_type: typing.Optional[str] = None
     description: typing.Optional[str] = None
 
 
@@ -39,16 +39,17 @@ class ActivateDeactivateFeeConfig(Command):
 class StudentFeeSetupCollect(Command):
     fee_config: UUID
     paid_amount: decimal.Decimal
+    fines: typing.Optional[typing.List[UUID]]
+    discounts: typing.Optional[typing.List[UUID]]
 
 
 @dataclass
 class CollectStudentFee(Command):
     fee_configs: typing.List[StudentFeeSetupCollect]
+    receipt_no: str
     payment_method: str
-    fine_id: typing.Optional[UUID] = None
-    discount_in: typing.Optional[str] = None
-    discount: typing.Optional[decimal.Decimal] = None
     narration: typing.Optional[str] = None
+<<<<<<< HEAD
 
 
 @dataclass
@@ -57,3 +58,12 @@ class AddScholarship(Command):
     scholarship_in: str
     scholarship: decimal.Decimal
     fee_config: typing.List[UUID]
+=======
+    issued_date: typing.Optional[datetime.date] = datetime.date.today()
+
+
+@dataclass
+class UpdateStudentPaidFeeConfig(Command):
+    paid_fee_config: UUID
+    paid_amount: decimal.Decimal
+>>>>>>> 99d178ed1e1151a148757ae8435c9fce70bedea4
